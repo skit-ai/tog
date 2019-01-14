@@ -83,6 +83,7 @@
 (defun tog-format-ov (o)
   (format "%s: %s, %s" (ov-val o 'tog-line-id) (ov-val o 'tog-start) (ov-val o 'tog-end)))
 
+;;;###autoload
 (defun tog-save-tags ()
   "Save all the annotations for current buffer."
   (interactive)
