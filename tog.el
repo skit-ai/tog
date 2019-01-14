@@ -29,6 +29,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'ov)
 (require 's)
 
@@ -64,12 +65,20 @@
   (interactive)
   (let* ((line-id (tog-line-id))
          (line-start (if line-id (tog-line-start-pos))))
-    (if line-id
-        (ov (region-beginning) (region-end)
-            'face 'tog-highlight
-            'tog-line-id line-id
-            'tog-start (- (region-beginning) line-start)
-            'tog-end (- (region-end) line-start)))))
+    (when line-id
+      (ov (region-beginning) (region-end)
+          'face 'tog-highlight
+          'tog-line-id line-id
+          'tog-start (- (region-beginning) line-start)
+          'tog-end (- (region-end) line-start))
+      (deactivate-mark))))
+
+;;;###autoload
+(defun tog-untag (arg)
+  (interactive "P")
+  (let ((ovs (if arg (ov-in (line-beginning-position) (line-end-position)) (list (ov-at)))))
+    (dolist (o ovs)
+      (delete-overlay o))))
 
 (defun tog-format-ov (o)
   (format "%s: %s, %s" (ov-val o 'tog-line-id) (ov-val o 'tog-start) (ov-val o 'tog-end)))
