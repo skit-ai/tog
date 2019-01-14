@@ -86,8 +86,7 @@
 ;;;###autoload
 (define-derived-mode tog-mode text-mode "tog"
   "Major mode for working with tog files"
-  (setq font-lock-defaults '(tog-highlight-patterns))
-  (tog-loag-tags))
+  (setq font-lock-defaults '(tog-highlight-patterns)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.tog\\'" . tog-mode))
