@@ -43,6 +43,10 @@
        :foreground "black"))
   "Face for annotated entity")
 
+(defcustom tog-tag-update-hook nil
+  "Stuff that runs after each tag update."
+  :type 'hook)
+
 (defun tog-tag-file-name ()
   "Return the annotation file name for current buffer."
   (s-replace-regexp "tog$" "tag.tog" (buffer-file-name)))
@@ -71,14 +75,16 @@
           'tog-line-id line-id
           'tog-start (- (region-beginning) line-start)
           'tog-end (- (region-end) line-start))
-      (deactivate-mark))))
+      (deactivate-mark)
+      (run-hook-with-args tog-tag-update-hook))))
 
 ;;;###autoload
 (defun tog-untag (arg)
   (interactive "P")
   (let ((ovs (if arg (ov-in (line-beginning-position) (line-end-position)) (list (ov-at)))))
     (dolist (o ovs)
-      (delete-overlay o))))
+      (delete-overlay o))
+    (run-hook-with-args tog-tag-update-hook)))
 
 (defun tog-format-ov (o)
   (format "%s: %s, %s" (ov-val o 'tog-line-id) (ov-val o 'tog-start) (ov-val o 'tog-end)))
