@@ -4,7 +4,7 @@
 
 ;; Author: Abhinav Tushar <lepisma@fastmail.com>
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "25") (ov "1.0.6") (s "1.12.0"))
+;; Package-Requires: ((emacs "26") (ov "1.0.6") (s "1.12.0"))
 ;; URL: https://github.com/lepisma/tog
 
 ;;; Commentary:
@@ -32,6 +32,8 @@
 (require 'cl-lib)
 (require 'ov)
 (require 's)
+(require 'tog-utils)
+(require 'tog-parse)
 
 (defvar tog-highlight-patterns
   '(("^[0-9]+" . font-lock-constant-face)
@@ -49,34 +51,44 @@
 
 (defun tog-tag-file-name ()
   "Return the annotation file name for current buffer."
-  (s-replace-regexp "tog$" "tag.tog" (buffer-file-name)))
+  (s-replace-regexp "tog$" "tog.tag" (buffer-file-name)))
 
-(defun tog-line-id ()
-  "Return identifier for the current line."
-  (save-excursion
-    (goto-char (line-beginning-position))
-    (if (re-search-forward "^\\([0-9]+\\)" (line-end-position) t)
-        (string-to-number (match-string-no-properties 1)))))
+(defun tog-read-tags ()
+  "Read tags for current tog file."
+  (with-current-buffer (find-file-noselect (tog-tag-file-name))
+    (let ((h (make-hash-table)))
+      (maplines-pos
+       (lambda ()
+         (let ((tag (tog-parse-tag)))
+           (if tag (puthash (car tag) (cons (cdr tag) (gethash (car tag) h nil)) h)))))
+      h)))
 
-(defun tog-line-start-pos ()
-  "Return starting position of text data (relative to buffer) for that line."
-  (+ (line-beginning-position)
-     (length (number-to-string (tog-line-id))) 1))
+(defun tog-region-valid-p ()
+  "Tell if the region lies in the valid zone."
+  (if (region-active-p)
+      (let ((tbol (tog-parse-line-start-pos)))
+        (if tbol
+            (<= tbol (region-beginning) (region-end) (line-end-position))))))
 
 ;;;###autoload
 (defun tog-tag ()
   "Annotate the currently selected region."
   (interactive)
-  (let* ((line-id (tog-line-id))
-         (line-start (if line-id (tog-line-start-pos))))
-    (when line-id
-      (ov (region-beginning) (region-end)
-          'face 'tog-highlight
-          'tog-line-id line-id
-          'tog-start (- (region-beginning) line-start)
-          'tog-end (- (region-end) line-start))
-      (deactivate-mark)
-      (run-hook-with-args 'tog-tag-update-hook))))
+  (let* ((tbol (tog-parse-line-start-pos))
+         (bound (cond ((tog-region-valid-p) (cons (region-beginning) (region-end)))
+                      ((not (region-active-p)) (cons tbol (line-end-position)))
+                      (t nil))))
+    (if bound
+        (let* ((line-id (tog-parse-line-id)))
+          (when line-id
+            (ov (car bound) (cdr bound)
+                'face 'tog-highlight
+                'tog-line-id line-id
+                'tog-start (- (car bound) tbol)
+                'tog-end (- (cdr bound) tbol))
+            (deactivate-mark)
+            (run-hook-with-args 'tog-tag-update-hook)))
+      (message "Invalid region selected"))))
 
 ;;;###autoload
 (defun tog-untag (arg)
@@ -87,22 +99,41 @@
     (run-hook-with-args 'tog-tag-update-hook)))
 
 (defun tog-format-ov (o)
-  (format "%s: %s, %s" (ov-val o 'tog-line-id) (ov-val o 'tog-start) (ov-val o 'tog-end)))
+  (format "%s: %s,%s" (ov-val o 'tog-line-id) (ov-val o 'tog-start) (ov-val o 'tog-end)))
+
+(defun tog-load-tags ()
+  "Load tags for the current file."
+  (let ((tag-table (tog-read-tags)))
+    (when tag-table
+      (maplines-pos
+       (lambda ()
+         (let ((line-id (tog-parse-line-id))
+               (line-start (tog-parse-line-start-pos)))
+           (dolist (td (gethash line-id tag-table nil))
+             (ov (+ line-start (car td)) (+ line-start (cdr td))
+                 'face 'tog-highlight
+                 'tog-line-id line-id
+                 'tog-start (car td)
+                 'tog-end (cdr td)))))))))
 
 ;;;###autoload
 (defun tog-save-tags ()
   "Save all the annotations for current buffer."
   (interactive)
   (let ((ovs (ov-all)))
-    (with-temp-file (tog-tag-file-name)
+    (with-current-buffer (find-file-noselect (tog-tag-file-name))
+      (delete-region (point-min) (point-max))
       (goto-char (point-min))
       (dolist (o ovs)
-        (insert (tog-format-ov o) "\n")))))
+        (insert (tog-format-ov o) "\n"))
+      (save-buffer))))
 
 ;;;###autoload
 (define-derived-mode tog-mode text-mode "tog"
   "Major mode for working with tog files"
-  (setq font-lock-defaults '(tog-highlight-patterns)))
+  (setq font-lock-defaults '(tog-highlight-patterns))
+  (tog-load-tags)
+  (read-only-mode))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.tog\\'" . tog-mode))
