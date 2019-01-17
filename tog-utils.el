@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'ov)
+
 (defun maplines-pos (fn)
   "Map over line (position based not text based). FN takes no
 argument and is called by iterating the point over lines."
@@ -45,6 +47,12 @@ line text."
      (let ((text (buffer-substring-no-properties (line-beginning-position)
                                                  (line-end-position))))
        (funcall fn text)))))
+
+(defun tog-format-ov (o)
+  (format "%s: %s,%s,%s"
+          (ov-val o 'tog-line-id)
+          (ov-val o 'tog-start) (ov-val o 'tog-end)
+          (ov-val o 'tog-type)))
 
 (provide 'tog-utils)
 

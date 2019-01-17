@@ -40,14 +40,24 @@
     (if (re-search-forward "^\\([0-9]+: \\)" (line-end-position) t)
         (+ (line-beginning-position) (length (match-string-no-properties 1))))))
 
+(defun tog-parse-buffer-types ()
+  "Parse tog-types from the buffer"
+  (save-excursion
+    (goto-char (point-min))
+    (re-search-forward "^# tog-types:\\(.*\\)" nil t)
+    (let ((str (match-string-no-properties 1)))
+      (when str
+        (s-split " " (string-trim str))))))
+
 (defun tog-parse-tag ()
   "Return tag information from current line."
   (save-excursion
     (goto-char (line-beginning-position))
-    (if (re-search-forward "^\\([0-9]+\\): \\([0-9]+\\),\\([0-9]+\\)" (line-end-position) t)
-        (cons (string-to-number (match-string-no-properties 1))
+    (if (re-search-forward "^\\([0-9]+\\): \\([0-9]+\\),\\([0-9]+\\),\\(.*\\)" (line-end-position) t)
+        (list (string-to-number (match-string-no-properties 1))
               (cons (string-to-number (match-string-no-properties 2))
-                    (string-to-number (match-string-no-properties 3)))))))
+                    (string-to-number (match-string-no-properties 3)))
+              (match-string-no-properties 4)))))
 
 (provide 'tog-parse)
 
