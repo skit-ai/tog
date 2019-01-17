@@ -1,3 +1,6 @@
 #+TITLE: tog
 
-Tagging interface for NLP-ish data.
+Tagging interface for NLP-ish data. Specifically for entity region tagging as
+shown here:
+
+[[file:./screen-tagged.png]]
