@@ -4,3 +4,29 @@ Tagging interface for NLP-ish data. Specifically for entity region tagging as
 shown here:
 
 [[file:./screen-tagged.png]]
+
+-----
+
+To start using tog, you need to generate a data file and then start Emacs with
+~tog-mode~ on this file. The file is based on the following structure:
+
+#+BEGIN_EXAMPLE
+# This is a comment
+# The next line specifies the tags (space separated) that we are going to use
+# in this file
+# tog-types: LOC NAME TIME
+
+# Each text is represented in a single like starting with a unique (integer)
+# identifier. For example:
+
+1323: This is my sentence
+2323: Another sentence, with one entity (next monday)
+#+END_EXAMPLE
+
+For tagging, you can either install this package or just run Emacs standalone
+and load only tog (and its dependencies). Following steps are needed to do the
+later:
+
+1. Install Emacs and [[https://github.com/cask/cask][cask]].
+2. In this directory run ~cask init~ to install dependencies locally.
+3. Run ~./tog.sh~ and open the ~.tog~ file you want to tag.
