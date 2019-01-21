@@ -16,7 +16,7 @@ To start using tog, you need to generate a data file and then start Emacs with
 # in this file
 # tog-types: LOC NAME TIME
 
-# Each text is represented in a single like starting with a unique (integer)
+# Each text is represented in a single like starting with a unique (alphanumeric)
 # identifier. For example:
 
 1323: This is my sentence
