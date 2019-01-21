@@ -47,7 +47,7 @@
     (re-search-forward "^# tog-types:\\(.*\\)" nil t)
     (let ((str (match-string-no-properties 1)))
       (when str
-        (s-split " " (string-trim str))))))
+        (s-split " " (s-trim str))))))
 
 (defun tog-parse-tag ()
   "Return tag information from current line."
