@@ -3,7 +3,7 @@
 ;; Copyright (c) 2019 Abhinav Tushar
 
 ;; Author: Abhinav Tushar <lepisma@fastmail.com>
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Package-Requires: ((emacs "26") (ov "1.0.6") (s "1.12.0"))
 ;; URL: https://github.com/lepisma/tog
 
