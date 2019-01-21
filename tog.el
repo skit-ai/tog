@@ -36,7 +36,7 @@
 (require 'tog-parse)
 
 (defvar tog-highlight-patterns
-  '(("^[0-9]+" . font-lock-constant-face)
+  '(("^[0-9,a-z,A-Z]+" . font-lock-constant-face)
     ("^#.*" . font-lock-comment-face))
   "Highlight faces for the buffer")
 

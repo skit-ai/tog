@@ -30,14 +30,14 @@
   "Return identifier for the current line."
   (save-excursion
     (goto-char (line-beginning-position))
-    (if (re-search-forward "^\\([0-9]+\\): " (line-end-position) t)
-        (string-to-number (match-string-no-properties 1)))))
+    (if (re-search-forward "^\\([0-9,a-z,A-Z]+\\): " (line-end-position) t)
+        (match-string-no-properties 1))))
 
 (defun tog-parse-line-start-pos ()
   "Return starting position of text data (relative to buffer) for current line."
   (save-excursion
     (goto-char (line-beginning-position))
-    (if (re-search-forward "^\\([0-9]+: \\)" (line-end-position) t)
+    (if (re-search-forward "^\\([0-9,a-z,A-Z]+: \\)" (line-end-position) t)
         (+ (line-beginning-position) (length (match-string-no-properties 1))))))
 
 (defun tog-parse-buffer-types ()
@@ -53,8 +53,8 @@
   "Return tag information from current line."
   (save-excursion
     (goto-char (line-beginning-position))
-    (if (re-search-forward "^\\([0-9]+\\): \\([0-9]+\\),\\([0-9]+\\),\\(.*\\)" (line-end-position) t)
-        (list (string-to-number (match-string-no-properties 1))
+    (if (re-search-forward "^\\([0-9,a-z,A-Z]+\\): \\([0-9]+\\),\\([0-9]+\\),\\(.*\\)" (line-end-position) t)
+        (list (match-string-no-properties 1)
               (cons (string-to-number (match-string-no-properties 2))
                     (string-to-number (match-string-no-properties 3)))
               (match-string-no-properties 4)))))
