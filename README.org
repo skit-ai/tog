@@ -28,5 +28,5 @@ and load only tog (and its dependencies). Following steps are needed to do the
 later:
 
 1. Install Emacs and [[https://github.com/cask/cask][cask]].
-2. In this directory run ~cask init~ to install dependencies locally.
+2. In this directory run ~cask install~ to install dependencies locally.
 3. Run ~./tog.sh~ and open the ~.tog~ file you want to tag.
