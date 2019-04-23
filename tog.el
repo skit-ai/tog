@@ -38,6 +38,9 @@
 (defcustom tog-buffer-name "*tog*"
   "Name of the tagging buffer")
 
+(defvar tog-source-file nil
+  "Path to the source file where we have the data.")
+
 (defvar tog-items nil
   "List of item objects for tagging.")
 
@@ -65,7 +68,7 @@
 
 (defun tog-save ()
   "Save tags in a file"
-  (let ((file-path "./tog-tags.json")
+  (let ((file-path (concat tog-source-file ".tog"))
         (tags))
     (dolist (it tog-items)
       (if (and (slot-boundp it :tag) (oref it :tag))
