@@ -30,6 +30,10 @@
   "Return text in the current line."
   (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
 
+(defun region-text ()
+  (when (region-active-p)
+    (buffer-substring-no-properties (region-beginning) (region-end))))
+
 (provide 'tog-utils)
 
 ;;; tog-utils.el ends here

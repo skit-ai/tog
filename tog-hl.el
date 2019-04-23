@@ -41,7 +41,7 @@
 We are not going the full faces way but will be moving there if
 needed.")
 
-(defun tog-hl-props-for-type (type)
+(defun tog-hl-props-for-type (tag-type)
   "Return extra face related attributes for the tog type to go in
 overlays."
   (let* ((idx (or (cl-position type tog-types :test 'equal) 0))
@@ -49,16 +49,16 @@ overlays."
     `(face (:background ,(car colors) :foreground ,(cdr colors))
            ,@(if type
                  (list 'after-string
-                       (propertize (format " %s " type)
+                       (propertize (format " %s " tag-type)
                                    'face `(:box (:line-width 1 :color)
                                                 :background ,(cdr colors)
                                                 :foreground ,(car colors))))))))
 
-(defun tog-hl-mark (type)
+(defun tog-hl-mark (tag-type)
   "Highlight the current region using the given type"
   (if (not (region-active-p))
       (message "No region active for highlighting")
-    (ov (region-beginning) (region-end) (tog-hl-props-for-type type))))
+    (ov (region-beginning) (region-end) (tog-hl-props-for-type tag-type))))
 
 (defun tog-hl-unmark (arg)
   "Remove mark from current position. If arg is not nil, clear

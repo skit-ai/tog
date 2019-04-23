@@ -8,3 +8,12 @@
 
 (require 'tog)
 ;; TODO: Change me to enable a certain kind of tagging
+
+(tog-conv-load-from-json "./alts-dt-num.json")
+
+;; Keys
+(define-key tog-mode-map (kbd "t") 'tog-conv-tag)
+(define-key tog-mode-map (kbd "f") 'tog-next)
+(define-key tog-mode-map (kbd "b") 'tog-prev)
+(define-key tog-mode-map (kbd "p") 'tog-conv-play)
+(define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
