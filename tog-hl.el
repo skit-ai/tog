@@ -44,10 +44,10 @@ needed.")
 (defun tog-hl-props-for-type (tag-type)
   "Return extra face related attributes for the tog type to go in
 overlays."
-  (let* ((idx (or (cl-position type tog-types :test 'equal) 0))
+  (let* ((idx (or (cl-position tag-type tog-types :test 'equal) 0))
          (colors (nth (% idx (length tog-hl-palette)) tog-hl-palette)))
     `(face (:background ,(car colors) :foreground ,(cdr colors))
-           ,@(if type
+           ,@(if tag-type
                  (list 'after-string
                        (propertize (format " %s " tag-type)
                                    'face `(:box (:line-width 1 :color)

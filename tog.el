@@ -68,12 +68,13 @@
 
 (defun tog-save ()
   "Save tags in a file"
+  (interactive)
   (let ((file-path (concat tog-source-file ".tog"))
         (tags))
     (dolist (it tog-items)
       (if (and (slot-boundp it :tag) (oref it :tag))
           ;; JSON needs string keys
-          (push (cons (number-to-string (oref it :id)) (oref conv tag)) tags)))
+          (push (cons (number-to-string (oref it :id)) (oref it tag)) tags)))
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 
@@ -94,7 +95,7 @@
   "Exit and cleanup."
   (interactive)
   (tog-save)
-  (if (buffer-live-p tog-buffer-name)
+  (if (bufferp tog-buffer-name)
       (kill-buffer tog-buffer-name))
   (setq tog-items nil
         tog-index nil

@@ -51,8 +51,7 @@
 
 (defun tog-conv-tag-same-type (ta tb)
   "Tell if two tag objects are equal in type."
-  (string= (alist-get 'tag-type ta)
-           (alist-get 'tag-type tb)))
+  (string= (alist-get 'tag-type ta) (alist-get 'tag-type tb)))
 
 (cl-defmethod apply-tag ((obj tog-conv) tag)
   "Apply tag to a conversation. This overrides an already present
@@ -104,11 +103,17 @@ tag of same type."
 NOTE: We don't merge multiple broken utterances."
   (mapcar (lambda (it) (gethash "transcript" it)) (aref (oref obj :alternatives) 0)))
 
+(cl-defmethod alt-tags ((obj tog-conv) alt-index)
+  "Return ranged tags present for the alternative index."
+  (when (slot-boundp obj :tag)
+    (-filter (lambda (t) (--if-let (alist-get 'alt-index t) (= alt-index it))) (oref obj :tag))))
+
 (cl-defmethod tog-show ((obj tog-conv))
   "Display a tog conv item in buffer for tagging."
   (let ((buffer (get-buffer-create tog-buffer-name)))
     (with-current-buffer buffer
       (read-only-mode -1)
+      (dolist (o (ov-all)) (delete-overlay o))
       (delete-region (point-min) (point-max))
       (tog-mode)
       (insert "* item " (number-to-string (oref obj :id)) "\n")
@@ -119,7 +124,19 @@ NOTE: We don't merge multiple broken utterances."
 
       (let ((i 0))
         (dolist (text (texts obj))
-          (insert (number-to-string i) ". " text "\n")
+          (insert (number-to-string i) ". " text)
+          ;; Highlight tags that are applied in this conversation
+          (save-excursion
+            (dolist (tag (alt-tags obj i))
+              (goto-char (line-beginning-position))
+              (re-search-forward "^[0-9]+\. ")
+              (let ((range (alist-get 'text-range tag)))
+                (goto-char (+ (point) (car range)))
+                (set-mark-command nil)
+                (goto-char (+ (point) (- (cadr range) (car range))))
+                (setq deactivate-mark nil))
+              (tog-hl-mark (alist-get 'type tag))))
+          (insert "\n")
           (incf i)))
 
       (if (slot-boundp obj :tag)
@@ -152,7 +169,7 @@ NOTE: We don't merge multiple broken utterances."
 (defun tog-conv-make-tag (tag-type)
   "Create tag from current selection and input."
   (let* ((user-entry (read-string (format "%s> " tag-type) (region-text))))
-    (apply-tag (tog-alts-current-conv)
+    (apply-tag (nth tog-index tog-items)
                `((type . ,tag-type)
                  (text . ,(if (string= user-entry "") nil user-entry))
                  (alt-index . ,(tog-conv-parse-alt-index))
