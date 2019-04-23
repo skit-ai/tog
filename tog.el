@@ -77,6 +77,30 @@
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 
+;;;###autoload
+(define-derived-mode tog-mode org-mode "tog"
+  "Major mode for togging.")
+
+;;;###autoload
+(defun tog ()
+  (interactive)
+  (if (null tog-items)
+      (message "No data loaded, try running a loader.")
+    (setq tog-index -1)
+    (tog-next)))
+
+;;;###autoload
+(defun tog-quit ()
+  "Exit and cleanup."
+  (interactive)
+  (tog-save)
+  (if (buffer-live-p tog-buffer-name)
+      (kill-buffer tog-buffer-name))
+  (setq tog-items nil
+        tog-index nil
+        tog-source-file nil
+        tog-types nil))
+
 (provide 'tog)
 
 ;;; tog.el ends here
