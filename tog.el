@@ -74,20 +74,6 @@
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 
-(defmacro tog-bind-char-keys (&rest chars)
-  (let ((idx 0)
-        (defuns nil))
-    (dolist (c chars)
-      (let ((command-sym (make-symbol (format "tog-tag-%s" idx))))
-        (push `(progn
-                 (defun ,command-sym () (interactive) (tog-tag ,idx))
-                 (define-key tog-mode-map (kbd ,(string c)) ',command-sym))
-              defuns))
-      (cl-incf idx))
-    `(progn ,@defuns)))
-
-(tog-bind-char-keys ?1 ?2 ?3 ?4 ?5)
-
 (provide 'tog)
 
 ;;; tog.el ends here
