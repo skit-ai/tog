@@ -73,7 +73,7 @@ tag of same type."
             :id (gethash "conversation_id" it)
             :reftime (gethash "reftime" it)
             :audio-url (gethash "audio_url" it)
-            :state (s-replace '(("_" . "-")) (gethash "state" it))
+            :state (s-replace-all '(("_" . "-")) (gethash "state" it))
             :metadata `((call-id . ,(gethash "call_id" it)))))
 
 (defun tog-conv-load-from-json (file-path)
