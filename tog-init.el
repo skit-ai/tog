@@ -7,5 +7,4 @@
 (load-theme 'wombat)
 
 (require 'tog)
-(add-hook 'tog-tag-update-hook 'tog-save-tags)
-(define-key tog-mode-map (kbd "DEL") 'tog-untag)
+;; TODO: Change me to enable a certain kind of tagging
