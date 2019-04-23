@@ -1,6 +1,0 @@
-# tog-types: LOC TIME
-
-1a: Hello world
-1b: Hola world
-2: This is a sentence to be tagged
-3: Tags go in the sibling file ./test.tog.tag
