@@ -10,7 +10,7 @@
 ;; TODO: Change me to enable a certain kind of tagging
 
 (tog-conv-load-from-json "./alts-dt-num.json")
-(setq tog-types '("people" "date" "time" "number" "datetime"))
+(setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
 
 ;; Keys
 (define-key tog-mode-map (kbd "t") 'tog-conv-tag)

@@ -103,10 +103,11 @@ tag of same type."
 NOTE: We don't merge multiple broken utterances."
   (mapcar (lambda (it) (gethash "transcript" it)) (aref (oref obj :alternatives) 0)))
 
-(cl-defmethod alt-tags ((obj tog-conv) alt-index)
+(cl-defmethod ranged-alt-tags ((obj tog-conv) alt-index)
   "Return ranged tags present for the alternative index."
   (when (slot-boundp obj :tag)
-    (-filter (lambda (t) (--if-let (alist-get 'alt-index t) (= alt-index it))) (oref obj :tag))))
+    (-filter (lambda (t) (--if-let (alist-get 'alt-index t) (and (= alt-index it) (alist-get 'text-range t))))
+             (oref obj :tag))))
 
 (cl-defmethod tog-show ((obj tog-conv))
   "Display a tog conv item in buffer for tagging."
@@ -127,7 +128,7 @@ NOTE: We don't merge multiple broken utterances."
           (insert (number-to-string i) ". " text)
           ;; Highlight tags that are applied in this conversation
           (save-excursion
-            (dolist (tag (alt-tags obj i))
+            (dolist (tag (ranged-alt-tags obj i))
               (goto-char (line-beginning-position))
               (re-search-forward "^[0-9]+\. ")
               (let ((range (alist-get 'text-range tag)))
