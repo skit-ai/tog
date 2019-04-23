@@ -26,33 +26,9 @@
 
 ;;; Code:
 
-(require 'ov)
-
-(defun maplines-pos (fn)
-  "Map over line (position based not text based). FN takes no
-argument and is called by iterating the point over lines."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((res))
-      (while (not (eobp))
-        (push (funcall fn) res)
-        (forward-line))
-      (nreverse res))))
-
 (defun line-text ()
   "Return text in the current line."
   (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
-
-(defun maplines (fn)
-  "Map over line texts. FN takes a single argument which is the
-line text."
-  (maplines-pos (lambda () (funcall fn (line-text)))))
-
-(defun tog-format-ov (o)
-  (format "%s: %s,%s,%s"
-          (ov-val o 'tog-line-id)
-          (ov-val o 'tog-start) (ov-val o 'tog-end)
-          (ov-val o 'tog-type)))
 
 (provide 'tog-utils)
 
