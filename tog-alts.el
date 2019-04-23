@@ -91,7 +91,7 @@
 (cl-defmethod conversation-set-tag ((obj tog-conversation) tag)
   "TODO: Do the proper setf thing."
   (let ((current-tags (conversation-get-tags obj)))
-    (let ((tag-idx (-find-index (lambda (t) (string= (car t) (alist-get 'tag-type tag))) current-tags)))
+    (let ((tag-idx (-find-index (lambda (t) (string= (alist-get 'tag-type t) (alist-get 'tag-type tag))) current-tags)))
       (if (null tag-idx)
           (oset obj :tag (cons tag current-tags))
         (oset obj :tag (-replace-at tag-idx tag current-tags))))))
@@ -129,7 +129,7 @@ following keys in each dictionary."
       (insert "* " (number-to-string (oref obj :id)) "\n")
       (org-set-property "REFTIME" (oref obj :reftime))
       (org-set-property "CALLURL" (call-url obj))
-      (org-set-property "STATE" (oref obj :state))
+      (org-set-property "STATE" (s-replace-all '(("_" . "-")) (oref obj :state)))
       (insert "\n")
       (let ((i 0))
         (dolist (text (conversation-texts obj))
@@ -191,17 +191,16 @@ following keys in each dictionary."
 (defun tog-alts-make-tag (tag-type)
   "Create tag from current selection and input."
   (let* ((user-entry (read-string (format "%s> " tag-type)))
-         (tag-data (if (eq user-entry "") nil user-entry))
+         (tag-data (if (string= user-entry "") nil user-entry))
          (alt-number (tog-alts-get-alt-number))
          (text-range (tog-alts-get-text-range)))
     (conversation-set-tag (tog-alts-current-conv)
                           `((tag-type . ,tag-type)
-                            (tag-data . ,(if (eq tag-data "") nil tag-data))
+                            (tag-data . ,tag-data)
                             (alt-number . ,alt-number)
                             (text-range . ,text-range)))
     ;; Highlight for feedback
     (when (region-active-p)
-      (dolist (o (ov-all)) (delete-overlay o))
       (ov (region-beginning) (region-end)
           '(face (:background "#f1c40f" :foreground "#191d24")))
       (deactivate-mark))))
@@ -226,6 +225,9 @@ following keys in each dictionary."
       (message "No file loaded, try running tog-alts-conversations-from-json")
     (setq tog-alts-conversation-id nil)
     (tog-alts-next)))
+
+(defun tog-alts-reset ()
+  (setq tog-alts-conversations nil))
 
 ;; TODO: Make this go in code
 (tog-alts-conversations-from-json "./alts-dt-num.json")
