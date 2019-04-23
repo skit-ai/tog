@@ -39,14 +39,14 @@ argument and is called by iterating the point over lines."
         (forward-line))
       (nreverse res))))
 
+(defun line-text ()
+  "Return text in the current line."
+  (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+
 (defun maplines (fn)
   "Map over line texts. FN takes a single argument which is the
 line text."
-  (maplines-pos
-   (lambda ()
-     (let ((text (buffer-substring-no-properties (line-beginning-position)
-                                                 (line-end-position))))
-       (funcall fn text)))))
+  (maplines-pos (lambda () (funcall fn (line-text)))))
 
 (defun tog-format-ov (o)
   (format "%s: %s,%s,%s"
