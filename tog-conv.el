@@ -69,7 +69,9 @@ tag of same type."
   "Clear current conversation."
   (interactive)
   (clear-tags (nth tog-index tog-items))
-  (org-todo "none")
+  (read-only-mode -1)
+  (org-todo "")
+  (read-only-mode)
   (dolist (o (ov-all)) (delete-overlay o)))
 
 (defun make-conv (it)
