@@ -13,9 +13,10 @@
 (setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
 
 ;; Keys
-(define-key tog-mode-map (kbd "t") 'tog-conv-tag)
-(define-key tog-mode-map (kbd "f") 'tog-next)
-(define-key tog-mode-map (kbd "b") 'tog-prev)
-(define-key tog-mode-map (kbd "p") 'tog-conv-play)
+(define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
+(define-key tog-mode-map (kbd "n") 'tog-next)
+(define-key tog-mode-map (kbd "p") 'tog-prev)
+(define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
+
 (define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
