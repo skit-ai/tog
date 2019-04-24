@@ -36,6 +36,8 @@
 (require 'tog-hl)
 (require 'tog-utils)
 (require 'tog-parse)
+(require 'tog-input)
+
 
 (defvar tog-conv-player-proc nil
   "Process related to the audio player.")
@@ -147,32 +149,21 @@ NOTE: We don't merge multiple broken utterances."
       (re-search-forward "^0\. "))
     (switch-to-buffer buffer)))
 
-(defun tog-conv-parse-alt-index ()
-  "Return alternative index for current region."
-  (and (region-active-p) (tog-parse-line-id)))
-
-(defun tog-conv-make-tag (tag-type)
-  "Create tag from current selection and input."
-  (let ((user-entry (read-string (format "%s> " tag-type) (region-text))))
-    (update-tag (nth tog-index tog-items)
-                `((type . ,tag-type)
-                  (text . ,(if (string= user-entry "") nil user-entry))
-                  (alt-index . ,(tog-conv-parse-alt-index))
-                  (text-range . ,(tog-parse-text-range))))
+;;;###autoload
+(defun tog-conv-tag ()
+  "Annotate current conversation."
+  (interactive)
+  (let* ((tag-type (tog-input-choice tog-types "Type: "))
+         (tag `((type . ,tag-type)
+                (text . ,(tog-input-string tag-type))
+                (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
+                (text-range . ,(tog-parse-text-range)))))
+    (update-tag (nth tog-index tog-items) tag)
 
     ;; Highlight for feedback
     (when (region-active-p)
       (tog-hl-mark tag-type)
       (deactivate-mark))))
-
-(defun tog-conv-tag ()
-  "Annotate current conversation."
-  (interactive)
-  (helm :sources (helm-build-sync-source "types"
-                   :candidates tog-types
-                   :action '(("annotate" . tog-conv-make-tag)))
-        :buffer "*helm tog-conv tag*"
-        :prompt "Type: "))
 
 (provide 'tog-conv)
 
