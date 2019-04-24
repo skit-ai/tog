@@ -66,6 +66,12 @@ tag of same type."
   "Remove all tags from the item."
   (oset obj :tag nil))
 
+(defun tog-conv-clear ()
+  "Clear current conversation."
+  (interactive)
+  (clear-tags (nth tog-index tog-items))
+  (org-todo "none")
+  (dolist (o (ov-all)) (delete-overlay o)))
 (defun make-conv (it)
   "Use parsed json hash from db to create a conversation."
   (tog-conv :alternatives (gethash "alternatives" it)

@@ -18,5 +18,7 @@
 (define-key tog-mode-map (kbd "p") 'tog-prev)
 (define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
 
+(define-key tog-mode-map (kbd "DEL") 'tog-conv-clear)
+
 (define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
