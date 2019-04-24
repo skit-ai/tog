@@ -53,14 +53,11 @@
   "Tell if two tag objects are equal in type."
   (string= (alist-get 'type ta) (alist-get 'type tb)))
 
-(cl-defmethod apply-tag ((obj tog-conv) tag)
+(cl-defmethod update-tag ((obj tog-conv) tag)
   "Apply tag to a conversation. This overrides an already present
 tag of same type."
   (let ((current-tags (if (slot-boundp obj :tag) (oref obj :tag))))
-    (let ((override-idx (-find-index (lambda (t) (tog-conv-tag-same-type t tag)) current-tags)))
-      (if override-idx
-          (oset obj :tag (-replace-at override-idx tag current-tags))
-        (oset obj :tag (cons tag current-tags))))))
+    (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) current-tags))))
 
 (cl-defmethod clear-tags ((obj tog-conv))
   "Remove all tags from the item."
@@ -170,11 +167,11 @@ NOTE: We don't merge multiple broken utterances."
 (defun tog-conv-make-tag (tag-type)
   "Create tag from current selection and input."
   (let ((user-entry (read-string (format "%s> " tag-type) (region-text))))
-    (apply-tag (nth tog-index tog-items)
-               `((type . ,tag-type)
-                 (text . ,(if (string= user-entry "") nil user-entry))
-                 (alt-index . ,(tog-conv-parse-alt-index))
-                 (text-range . ,(tog-conv-parse-text-range))))
+    (update-tag (nth tog-index tog-items)
+                `((type . ,tag-type)
+                  (text . ,(if (string= user-entry "") nil user-entry))
+                  (alt-index . ,(tog-conv-parse-alt-index))
+                  (text-range . ,(tog-conv-parse-text-range))))
 
     ;; Highlight for feedback
     (when (region-active-p)

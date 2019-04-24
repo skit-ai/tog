@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'dash)
+
 (defun line-text ()
   "Return text in the current line."
   (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
@@ -33,6 +35,12 @@
 (defun region-text ()
   (when (region-active-p)
     (buffer-substring-no-properties (region-beginning) (region-end))))
+
+(defun upsert (item pred list)
+  "Update if PRED satisfies anything, else cons in the LIST."
+  (-if-let (match-idx (-find-index pred list))
+      (-replace-at match-idx item list)
+    (cons item list)))
 
 (provide 'tog-utils)
 
