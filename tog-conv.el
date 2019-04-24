@@ -35,6 +35,7 @@
 (require 'dash)
 (require 'tog-hl)
 (require 'tog-utils)
+(require 'tog-parse)
 
 (defvar tog-conv-player-proc nil
   "Process related to the audio player.")
@@ -147,22 +148,8 @@ NOTE: We don't merge multiple broken utterances."
     (switch-to-buffer buffer)))
 
 (defun tog-conv-parse-alt-index ()
-  "Return alternative number for current line."
-  (save-excursion
-    (goto-char (line-beginning-position))
-    (when (re-search-forward "^\\([[:digit:]]\\)\. " (line-end-position) t)
-      (string-to-number (match-string-no-properties 1)))))
-
-(defun tog-conv-parse-text-range ()
-  "Return text range for marked alternative."
-  (when (region-active-p)
-    (let ((bounds (car (region-bounds)))
-          (line-start (line-beginning-position)))
-      (save-excursion
-        (goto-char (line-beginning-position))
-        (when (re-search-forward "^\\([[:digit:]]\. +\\)" (line-end-position) t)
-          (let ((offset (+ line-start (length (match-string-no-properties 1)))))
-            (list (- (car bounds) offset) (- (cdr bounds) offset))))))))
+  "Return alternative index for current region."
+  (and (region-active-p) (tog-parse-line-id)))
 
 (defun tog-conv-make-tag (tag-type)
   "Create tag from current selection and input."
@@ -171,7 +158,7 @@ NOTE: We don't merge multiple broken utterances."
                 `((type . ,tag-type)
                   (text . ,(if (string= user-entry "") nil user-entry))
                   (alt-index . ,(tog-conv-parse-alt-index))
-                  (text-range . ,(tog-conv-parse-text-range))))
+                  (text-range . ,(tog-parse-text-range))))
 
     ;; Highlight for feedback
     (when (region-active-p)
