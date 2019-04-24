@@ -78,7 +78,8 @@
 
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
-  "Major mode for togging.")
+  "Major mode for togging."
+  (setq header-line-format '(:eval (format "  Doing item %s. Total %s." (+ 1 tog-index) (length tog-items)))))
 
 ;;;###autoload
 (defun tog ()
