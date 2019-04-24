@@ -170,7 +170,11 @@ NOTE: We don't merge multiple broken utterances."
     ;; Highlight for feedback
     (when (region-active-p)
       (tog-hl-mark tag-type)
-      (deactivate-mark))))
+      (deactivate-mark))
+
+    (read-only-mode -1)
+    (org-todo "DONE")
+    (read-only-mode)))
 
 (provide 'tog-conv)
 
