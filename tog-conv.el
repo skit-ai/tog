@@ -71,6 +71,7 @@ tag of same type."
   (clear-tags (nth tog-index tog-items))
   (org-todo "none")
   (dolist (o (ov-all)) (delete-overlay o)))
+
 (defun make-conv (it)
   "Use parsed json hash from db to create a conversation."
   (tog-conv :alternatives (gethash "alternatives" it)
@@ -138,7 +139,7 @@ NOTE: We don't merge multiple broken utterances."
               (let ((range (alist-get 'text-range tag)))
                 (goto-char (+ (point) (car range)))
                 (set-mark-command nil)
-                (goto-char (+ (point) (- (cdr range) (car range))))
+                (goto-char (+ (point) (- (cadr range) (car range))))
                 (setq deactivate-mark nil))
               (tog-hl-mark (alist-get 'type tag))))
           (insert "\n")

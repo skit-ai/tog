@@ -72,7 +72,7 @@
     (dolist (it tog-items)
       (if (oref it :tag)
           ;; JSON needs string keys
-          (push (cons (number-to-string (oref it :id)) (tag-alist it)) tags)))
+          (push (cons (number-to-string (oref it :id)) (oref it :tag)) tags)))
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 

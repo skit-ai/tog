@@ -40,7 +40,10 @@ text goes like:
 (defun tog-parse-text-range (&optional pattern)
   "Return marked range relative to the text. PATTERN identifies
 the parts to ignore. If defaults to the usual assumption about
-having an integer with a full stop at the end."
+having an integer with a full stop at the end.
+
+We return a list instead of cons since that goes well in
+json-encode*."
   (when (region-active-p)
     (let ((bounds (car (region-bounds)))
           (line-start (line-beginning-position))
@@ -49,7 +52,7 @@ having an integer with a full stop at the end."
         (goto-char (line-beginning-position))
         (when (re-search-forward pattern (line-end-position) t)
           (let ((offset (+ line-start (length (match-string-no-properties 0)))))
-            (cons (- (car bounds) offset)
+            (list (- (car bounds) offset)
                   (- (cdr bounds) offset))))))))
 
 
