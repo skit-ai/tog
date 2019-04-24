@@ -49,7 +49,7 @@
    (audio-url :initarg :audio-url)
    (state :initarg :state)
    (metadata :initarg :metadata)
-   (tag :initarg :tag))
+   (tag :initarg :tag :initform nil))
   "A conversation (turn) for a call.")
 
 (defun tog-conv-tag-same-type (ta tb)
@@ -59,8 +59,7 @@
 (cl-defmethod update-tag ((obj tog-conv) tag)
   "Apply tag to a conversation. This overrides an already present
 tag of same type."
-  (let ((current-tags (if (slot-boundp obj :tag) (oref obj :tag))))
-    (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) current-tags))))
+  (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) (oref obj :tag))))
 
 (cl-defmethod clear-tags ((obj tog-conv))
   "Remove all tags from the item."
@@ -111,9 +110,8 @@ NOTE: We don't merge multiple broken utterances."
 
 (cl-defmethod ranged-alt-tags ((obj tog-conv) alt-index)
   "Return ranged tags present for the alternative index."
-  (when (slot-boundp obj :tag)
-    (-filter (lambda (t) (--if-let (alist-get 'alt-index t) (and (= alt-index it) (alist-get 'text-range t))))
-             (oref obj :tag))))
+  (-filter (lambda (t) (--if-let (alist-get 'alt-index t) (and (= alt-index it) (alist-get 'text-range t))))
+           (oref obj :tag)))
 
 (cl-defmethod tog-show ((obj tog-conv))
   "Display a tog conv item in buffer for tagging."
@@ -146,7 +144,7 @@ NOTE: We don't merge multiple broken utterances."
           (insert "\n")
           (incf i)))
 
-      (if (slot-boundp obj :tag)
+      (if (oref obj :tag)
           (org-todo "DONE"))
 
       (read-only-mode)

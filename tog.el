@@ -70,9 +70,9 @@
   (let ((file-path (concat tog-source-file ".tog"))
         (tags))
     (dolist (it tog-items)
-      (if (and (slot-boundp it :tag) (oref it :tag))
+      (if (oref it :tag)
           ;; JSON needs string keys
-          (push (cons (number-to-string (oref it :id)) (oref it tag)) tags)))
+          (push (cons (number-to-string (oref it :id)) (tag-alist it)) tags)))
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 
