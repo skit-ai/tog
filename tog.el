@@ -112,8 +112,8 @@ alist. While reading the jsons, we convert vectors to lists."
   "Exit and cleanup."
   (interactive)
   (tog-save)
-  (if (bufferp tog-buffer-name)
-      (kill-buffer tog-buffer-name))
+  (when (get-buffer tog-buffer-name)
+    (kill-buffer tog-buffer-name))
   (setq tog-items nil
         tog-index nil
         tog-source-file nil
