@@ -32,6 +32,7 @@
 (require 'cl-lib)
 (require 'f)
 (require 'tog-conv)
+(require 'tog-progress)
 
 (defcustom tog-buffer-name "*tog*"
   "Name of the tagging buffer")
@@ -121,7 +122,7 @@ alist. While reading the jsons, we convert vectors to lists."
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
   "Major mode for togging."
-  (setq header-line-format '(:eval (format "  Doing item %s. Total %s." (+ 1 tog-index) (length tog-items)))))
+  :after-hook (setq header-line-format '(:eval (tog-progress-build-header))))
 
 ;;;###autoload
 (defun tog ()
