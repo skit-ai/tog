@@ -48,21 +48,27 @@
 (defvar tog-types nil
   "Types like LOC, NAME etc. allowed for a task.")
 
+(defun tog-show-current ()
+  (tog-show (nth tog-index tog-items)))
+
+(defun tog-goto (idx)
+  "Jump to idx item for tagging. Boundary handling is done in
+this function so the caller need not worry about anything other
++/-."
+  (setq tog-index (min (- (length tog-items) 1) (max 0 idx)))
+  (tog-show-current)
+  (cond ((= tog-index 0) (message "Reached first item"))
+        ((= tog-index (- (length tog-items) 1)) (message "Reached last item"))))
+
 (defun tog-next ()
   "Go to next item for tagging."
   (interactive)
-  (if (= (length tog-items) (+ 1 tog-index))
-      (message "Reached last item")
-    (cl-incf tog-index)
-    (tog-show (nth tog-index tog-items))))
+  (tog-goto (+ tog-index 1)))
 
 (defun tog-prev ()
   "Go to previous item for tagging."
   (interactive)
-  (if (zerop tog-index)
-      (message "Reached first item")
-    (cl-decf tog-index)
-    (tog-show (nth tog-index tog-items))))
+  (tog-goto (- tog-index 1)))
 
 (defun tog-save ()
   "Save tags in a file"
