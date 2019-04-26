@@ -65,6 +65,24 @@ this function so the caller need not worry about anything other
   (interactive)
   (tog-goto (+ tog-index 1)))
 
+(defun tog-next-untagged ()
+  "Go to next item which is untagged, ignoring current one."
+  (interactive)
+  (let ((jump-index (+ tog-index 1)))
+    (while (and (oref (nth jump-index tog-items) :tag)
+                (< jump-index (length tog-items)))
+      (cl-incf jump-index))
+    (tog-goto jump-index)))
+
+(defun tog-prev-untagged ()
+  "Go to previous item which is untagged, ignoring current one."
+  (interactive)
+  (let ((jump-index (+ tog-index 1)))
+    (while (and (oref (nth jump-index tog-items) :tag)
+                (>= jump-index 0))
+      (cl-decf jump-index))
+    (tog-goto jump-index)))
+
 (defun tog-prev ()
   "Go to previous item for tagging."
   (interactive)

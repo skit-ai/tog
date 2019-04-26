@@ -7,15 +7,22 @@
 (load-theme 'wombat)
 
 (require 'tog)
-;; TODO: Change me to enable a certain kind of tagging
 
-(tog-conv-load-from-json "./alts-dt-num.json")
+;; NOTE: Here is a pipeline for tagging entities
 (setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
 
-;; Keys
+;; First we load the data file with items to tag
+(tog-conv-load-from-json "./alts-dt-num.json")
+
+;; Next, optionally, load the already done tags
+(tog-load)
+
+;; Define Keys
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
 (define-key tog-mode-map (kbd "n") 'tog-next)
+(define-key tog-mode-map (kbd "N") 'tog-next-untagged)
 (define-key tog-mode-map (kbd "p") 'tog-prev)
+(define-key tog-mode-map (kbd "P") 'tog-prev-untagged)
 (define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
 
 (define-key tog-mode-map (kbd "DEL") 'tog-conv-clear)
