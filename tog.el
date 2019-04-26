@@ -77,7 +77,7 @@ this function so the caller need not worry about anything other
 (defun tog-prev-untagged ()
   "Go to previous item which is untagged, ignoring current one."
   (interactive)
-  (let ((jump-index (+ tog-index 1)))
+  (let ((jump-index (- tog-index 1)))
     (while (and (oref (nth jump-index tog-items) :tag)
                 (>= jump-index 0))
       (cl-decf jump-index))
