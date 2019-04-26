@@ -76,6 +76,24 @@
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 
+(defun tog-load ()
+  "Load tags from file and apply to current items. Tags are
+stored as map from item-id to tag objects represented as list of
+alist. While reading the jsons, we convert vectors to lists."
+  (interactive)
+  (if (null tog-source-file)
+      (error "tog-source-file not defined, load a data file first.")
+    (let* ((file-path (concat tog-source-file ".tog"))
+           (json-array-type 'list))
+      ;; TODO: This can be sped up if I choose right data structures. Not a
+      ;;       problem at the moment though.
+      (dolist (tag-data (json-read-file file-path))
+        (dolist (tog-item tog-items)
+          (if (= (oref tog-item :id)
+                 (string-to-number (symbol-name (car tag-data))))
+              (dolist (tag (cdr tag-data))
+                (update-tag tog-item tag))))))))
+
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
   "Major mode for togging."
