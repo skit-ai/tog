@@ -27,10 +27,15 @@
 ;;; Code:
 
 (require 'dash)
+(require 's)
 
 (defun tog-progress-done ()
   "Return count of done items"
   (-reduce-from (lambda (acc it) (if (oref it :tag) (+ acc 1) acc)) 0 tog-items))
+
+(defun tog-progress-build-bar (n)
+  "Return bar string of given size."
+  (propertize (s-repeat n "—") 'face 'font-lock-keyword-face))
 
 (defun tog-progress-build-header ()
   "Prepare string to show in header line"
@@ -39,12 +44,12 @@
          (n-done (round (* width (/ (float (tog-progress-done)) (length tog-items)))))
          (current-pos-marker "⯆"))
     (if (> current-pos n-done)
-        (concat (propertize (s-repeat n-done "—") 'face 'font-lock-keyword-face)
+        (concat (tog-progress-build-bar n-done)
                 (s-repeat (- current-pos n-done) " ")
                 current-pos-marker)
-      (concat (propertize (s-repeat current-pos "—") 'face 'font-lock-keyword-face)
+      (concat (tog-progress-build-bar current-pos)
               current-pos-marker
-              (propertize (s-repeat (- n-done current-pos 1) "—") 'face 'font-lock-keyword-face)))))
+              (tog-progress-build-bar (- n-done current-pos 1))))))
 
 (provide 'tog-progress)
 
