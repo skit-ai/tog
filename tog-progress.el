@@ -37,7 +37,7 @@
   (let* ((width (window-width))
          (current-pos (round (* width (/ (float tog-index) (length tog-items)))))
          (n-done (round (* width (/ (float (tog-progress-done)) (length tog-items)))))
-         (current-pos-marker (propertize "⯆" 'face '(:inherit default :slant normal))))
+         (current-pos-marker "⯆"))
     (if (> current-pos n-done)
         (concat (propertize (s-repeat n-done "—") 'face 'font-lock-keyword-face)
                 (s-repeat (- current-pos n-done) " ")
