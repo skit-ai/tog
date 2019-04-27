@@ -35,33 +35,50 @@
 (require 'tog-progress)
 
 (defcustom tog-buffer-name "*tog*"
-  "Name of the tagging buffer")
+  "Name of the tagging buffer. This is the shared buffer for all
+kind of tagging. Note that only one kind of tagging can happen at
+a given time.")
 
 (defvar tog-source-file nil
-  "Path to the source file where we have the data.")
+  "Path to the json source file where we have the data. The
+assumption is that the file contains a list of dictionaries each
+with at least an `id' key. The rest is open for interpretation by
+the main loading code.")
 
 (defvar tog-items nil
-  "List of item objects for tagging.")
+  "List of item objects for tagging. Each object is identified
+using an `id' key.")
 
 (defvar tog-index nil
-  "Index of current item being tagged.")
+  "Index of current item being tagged in the list `tog-items'.")
 
 (defvar tog-types nil
-  "Types like LOC, NAME etc. allowed for a task.")
+  "Types like LOC, NAME etc. allowed for a task. If only one item
+is present in the list, we assume that to be the default while
+tagging.")
 
 (defvar tog-method 'ranged
-  "Method of tagging to use. Possible values are `ranged',
-  `boolean' and `choice'.")
+  "Method of tagging to use. Possible values are:
 
-(defun tog-show-current ()
-  (tog-show (nth tog-index tog-items)))
+- `ranged': Ask for type and a range to highlight for that range.
+  Note that we only allow one range for a single type. This
+  should not be a problem since we can just rename the types to
+  for disambiguation. Additional fields include `text',
+  `alt-index' and `text-range'. If `text' is not provided but a
+  tag for a type is present, we assume this particular type is
+  not present in the tagged item.
+
+- `boolean': Ask if something is there or not. No extra metadata
+  is present other than `value' which keeps the boolean value (t,
+  nil). If multiple types are present, this can be used for
+  things like intent tagging.")
 
 (defun tog-goto (idx)
   "Jump to idx item for tagging. Boundary handling is done in
 this function so the caller need not worry about anything other
 +/-."
   (setq tog-index (min (- (length tog-items) 1) (max 0 idx)))
-  (tog-show-current)
+  (tog-show (nth tog-index tog-items))
   (cond ((= tog-index 0) (message "Reached first item"))
         ((= tog-index (- (length tog-items) 1)) (message "Reached last item"))))
 
@@ -94,7 +111,9 @@ this function so the caller need not worry about anything other
   (tog-goto (- tog-index 1)))
 
 (defun tog-save ()
-  "Save tags in a file"
+  "Save tags in a file. We generate a sibling file with the same
+name as the source file and add a suffix to it. This can be
+changed but I don't feel that is ever really needed."
   (interactive)
   (let ((file-path (concat tog-source-file ".tog"))
         (tags))
@@ -106,9 +125,9 @@ this function so the caller need not worry about anything other
     (message "Tags saved at %s" file-path)))
 
 (defun tog-load ()
-  "Load tags from file and apply to current items. Tags are
-stored as map from item-id to tag objects represented as list of
-alist. While reading the jsons, we convert vectors to lists."
+  "Load tags from the sibling file and apply to current items.
+Tags are stored as map from item-id to tag objects represented as
+list of alist."
   (interactive)
   (if (null tog-source-file)
       (error "tog-source-file not defined, load a data file first.")
@@ -132,6 +151,8 @@ alist. While reading the jsons, we convert vectors to lists."
 
 ;;;###autoload
 (defun tog ()
+  "Start tagging after the variables `tog-items', `tog-types' and
+`tog-method' are all set."
   (interactive)
   (if (null tog-items)
       (message "No data loaded, try running a loader.")
@@ -140,9 +161,10 @@ alist. While reading the jsons, we convert vectors to lists."
 
 ;;;###autoload
 (defun tog-quit ()
-  "Exit and cleanup."
+  "Exit and cleanup. We don't save before exiting by default
+since this might do bad things to tag file if the user is exiting
+because of an screw up while tagging."
   (interactive)
-  (tog-save)
   (when (get-buffer tog-buffer-name)
     (kill-buffer tog-buffer-name))
   (setq tog-items nil

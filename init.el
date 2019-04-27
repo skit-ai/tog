@@ -8,15 +8,6 @@
 
 (require 'tog)
 
-;; NOTE: Here is a pipeline for tagging entities
-(setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
-
-;; First we load the data file with items to tag
-(tog-conv-load-from-json "./alts-dt-num.json")
-
-;; Next, optionally, load the already done tags
-(tog-load)
-
 ;; Define Keys
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
 (define-key tog-mode-map (kbd "n") 'tog-next)
@@ -29,3 +20,19 @@
 
 (define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
+
+;; NOTE: Here is a pipeline for tagging entities
+(setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
+(setq tog-method 'ranged)
+
+;; First we load the data file with items to tag
+(tog-conv-load-from-json "./alts-dt-num.json")
+;; Next, optionally, load the already done tags
+(tog-load)
+
+;; NOTE: Here is a pipeline for single intent +/- tagging.
+(setq tog-types '("ATLAS-MISFIRE"))
+(setq tog-method 'boolean)
+(tog-conv-load-from-json "./alts-location.json")
+
+(tog-load)
