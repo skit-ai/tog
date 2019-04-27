@@ -110,14 +110,16 @@ alist. While reading the jsons, we convert vectors to lists."
       (error "tog-source-file not defined, load a data file first.")
     (let* ((file-path (concat tog-source-file ".tog"))
            (json-array-type 'list))
-      ;; TODO: This can be sped up if I choose right data structures. Not a
-      ;;       problem at the moment though.
-      (dolist (tag-data (json-read-file file-path))
-        (dolist (tog-item tog-items)
-          (if (= (oref tog-item :id)
-                 (string-to-number (symbol-name (car tag-data))))
-              (dolist (tag (cdr tag-data))
-                (update-tag tog-item tag))))))))
+      (if (not (f-exists? file-path))
+          (message "Tag file not found. Loading nothing")
+        ;; TODO: This can be sped up if I choose right data structures. Not a
+        ;;       problem at the moment though.
+        (dolist (tag-data (json-read-file file-path))
+          (dolist (tog-item tog-items)
+            (if (= (oref tog-item :id)
+                   (string-to-number (symbol-name (car tag-data))))
+                (dolist (tag (cdr tag-data))
+                  (update-tag tog-item tag)))))))))
 
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
