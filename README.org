@@ -12,4 +12,4 @@ later:
 
 1. Install Emacs and [[https://github.com/cask/cask][cask]].
 2. In this directory run ~cask install~ to install dependencies locally.
-3. Run ~./tog.sh~
+3. Check ~./init.el~.
