@@ -36,11 +36,9 @@
 (require 'tog-hl)
 (require 'tog-utils)
 (require 'tog-parse)
+(require 'tog-player)
 (require 'tog-input)
 
-
-(defvar tog-conv-player-proc nil
-  "Process related to the audio player.")
 
 (defclass tog-conv ()
   ((alternatives :initarg :alternatives)
@@ -87,19 +85,13 @@ tag of same type."
   (setq tog-items (mapcar #'make-conv (json-parse-string (f-read file-path)))
         tog-source-file file-path))
 
-(cl-defmethod play ((obj tog-conv))
-  "Stop the current playback and play this conversation."
-  (let ((program "mplayer")
-        (url (oref obj :audio-url)))
-    (if (not url)
-        (message "No audio found for this conversation")
-      (if tog-conv-player-proc (delete-process tog-conv-player-proc))
-      (setq tog-conv-player-proc (start-process "tog-player" nil program url)))))
-
 (defun tog-conv-play ()
   "Command for playing current item."
   (interactive)
-  (play (nth tog-index tog-items)))
+  (let ((url (oref (nth tog-index tog-items) :audio-url)))
+    (if (not url)
+        (message "No audio found for this conversation")
+      (tog-player-play url))))
 
 (cl-defmethod call-url ((obj tog-conv))
   "Return metabase call url."
