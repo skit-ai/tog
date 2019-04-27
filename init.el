@@ -37,5 +37,12 @@
 (setq tog-types '("LOCATION-PRESENT"))
 (setq tog-method 'boolean)
 (tog-conv-load-from-json "./alts-location.json")
-
 (tog-load)
+
+;; Hook for fast jumps
+(defun tog-conv-go-go ()
+  (tog-next)
+  (tog-conv-play)
+  (tog-conv-tag))
+
+(add-hook 'tog-conv-after-tag-hook #'tog-conv-go-go)

@@ -40,6 +40,9 @@
 (require 'tog-input)
 
 
+(defcustom tog-conv-after-tag-hook nil
+  "Hook after a tag is applied.")
+
 (defclass tog-conv ()
   ((alternatives :initarg :alternatives)
    (id :initarg :id)
@@ -180,7 +183,8 @@ TODO: We don't merge multiple broken utterances."
         (update-tag (nth tog-index tog-items) tag)
         ;; TODO: This redraw gives a jittery experience but we will see later if
         ;;       we need to fix that
-        (tog-show (nth tog-index tog-items))))))
+        (tog-show (nth tog-index tog-items))
+        (run-hooks 'tog-conv-after-tag-hook)))))
 
 (provide 'tog-conv)
 
