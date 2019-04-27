@@ -68,11 +68,10 @@ tag of same type."
 (defun tog-conv-clear ()
   "Clear current conversation."
   (interactive)
-  (clear-tags (nth tog-index tog-items))
-  (read-only-mode -1)
-  (org-todo "")
-  (read-only-mode)
-  (dolist (o (ov-all)) (delete-overlay o)))
+  (let ((inhibit-read-only t))
+    (clear-tags (nth tog-index tog-items))
+    (org-todo "")
+    (dolist (o (ov-all)) (delete-overlay o))))
 
 (defun make-conv (it)
   "Use parsed json hash from db to create a conversation."
@@ -120,40 +119,39 @@ NOTE: We don't merge multiple broken utterances."
   "Display a tog conv item in buffer for tagging."
   (let ((buffer (get-buffer-create tog-buffer-name)))
     (with-current-buffer buffer
-      (read-only-mode -1)
-      (dolist (o (ov-all)) (delete-overlay o))
-      (delete-region (point-min) (point-max))
-      (tog-mode)
-      (insert "* item " (number-to-string (oref obj :id)) "\n")
-      (org-set-property "REFTIME" (oref obj :reftime))
-      (org-set-property "CALL-URL" (call-url obj))
-      (org-set-property "STATE" (oref obj :state))
-      (insert "\n")
+      (let ((inhibit-read-only t))
+        (dolist (o (ov-all)) (delete-overlay o))
+        (delete-region (point-min) (point-max))
+        (tog-mode)
+        (insert "* item " (number-to-string (oref obj :id)) "\n")
+        (org-set-property "REFTIME" (oref obj :reftime))
+        (org-set-property "CALL-URL" (call-url obj))
+        (org-set-property "STATE" (oref obj :state))
+        (insert "\n")
 
-      (let ((i 0))
-        (dolist (text (texts obj))
-          (insert (number-to-string i) ". " text)
-          ;; Highlight tags that are applied in this conversation
-          (save-excursion
-            (dolist (tag (ranged-alt-tags obj i))
-              (goto-char (line-beginning-position))
-              (re-search-forward "^[0-9]+\. ")
-              (let ((range (alist-get 'text-range tag)))
-                (goto-char (+ (point) (car range)))
-                (set-mark-command nil)
-                (goto-char (+ (point) (- (cadr range) (car range))))
-                (setq deactivate-mark nil))
-              (tog-hl-mark (alist-get 'type tag))))
-          (insert "\n")
-          (incf i)))
+        (let ((i 0))
+          (dolist (text (texts obj))
+            (insert (number-to-string i) ". " text)
+            ;; Highlight tags that are applied in this conversation
+            (save-excursion
+              (dolist (tag (ranged-alt-tags obj i))
+                (goto-char (line-beginning-position))
+                (re-search-forward "^[0-9]+\. ")
+                (let ((range (alist-get 'text-range tag)))
+                  (goto-char (+ (point) (car range)))
+                  (set-mark-command nil)
+                  (goto-char (+ (point) (- (cadr range) (car range))))
+                  (setq deactivate-mark nil))
+                (tog-hl-mark (alist-get 'type tag))))
+            (insert "\n")
+            (incf i)))
 
-      (if (oref obj :tag)
-          (org-todo "DONE"))
+        (if (oref obj :tag)
+            (org-todo "DONE"))
 
-      (read-only-mode)
-      (goto-char (point-min))
-      ;; This is only for putting cursor at a comfortable position
-      (re-search-forward "^0\. "))
+        (goto-char (point-min))
+        ;; This is only for putting cursor at a comfortable position
+        (re-search-forward "^0\. ")))
     (switch-to-buffer buffer)))
 
 ;;;###autoload
@@ -167,15 +165,9 @@ NOTE: We don't merge multiple broken utterances."
                    (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
                    (text-range . ,(tog-parse-text-range)))))
         (update-tag (nth tog-index tog-items) tag)
-
-        ;; Highlight for feedback
-        (when (region-active-p)
-          (tog-hl-mark tag-type)
-          (deactivate-mark))
-
-        (read-only-mode -1)
-        (org-todo "DONE")
-        (read-only-mode)))))
+        ;; TODO: This redraw gives a jittery experience but we will see later if
+        ;;       we need to optimize something
+        (tog-show (nth tog-index tog-items))))))
 
 (provide 'tog-conv)
 
