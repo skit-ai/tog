@@ -160,21 +160,22 @@ NOTE: We don't merge multiple broken utterances."
 (defun tog-conv-tag ()
   "Annotate current conversation."
   (interactive)
-  (let* ((tag-type (tog-input-choice tog-types "Type: "))
-         (tag `((type . ,tag-type)
-                (text . ,(tog-input-string tag-type))
-                (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
-                (text-range . ,(tog-parse-text-range)))))
-    (update-tag (nth tog-index tog-items) tag)
+  (let ((tag-type (tog-input-choice tog-types "Type: ")))
+    (when tag-type
+      (let ((tag `((type . ,tag-type)
+                   (text . ,(tog-input-string tag-type))
+                   (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
+                   (text-range . ,(tog-parse-text-range)))))
+        (update-tag (nth tog-index tog-items) tag)
 
-    ;; Highlight for feedback
-    (when (region-active-p)
-      (tog-hl-mark tag-type)
-      (deactivate-mark))
+        ;; Highlight for feedback
+        (when (region-active-p)
+          (tog-hl-mark tag-type)
+          (deactivate-mark))
 
-    (read-only-mode -1)
-    (org-todo "DONE")
-    (read-only-mode)))
+        (read-only-mode -1)
+        (org-todo "DONE")
+        (read-only-mode)))))
 
 (provide 'tog-conv)
 
