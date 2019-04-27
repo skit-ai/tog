@@ -107,7 +107,7 @@ tag of same type."
 
 (cl-defmethod texts ((obj tog-conv))
   "Return a list of texts in the alternatives.
-NOTE: We don't merge multiple broken utterances."
+TODO: We don't merge multiple broken utterances."
   (mapcar (lambda (it) (gethash "transcript" it)) (aref (oref obj :alternatives) 0)))
 
 (cl-defmethod ranged-alt-tags ((obj tog-conv) alt-index)
