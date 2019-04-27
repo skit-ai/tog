@@ -1,7 +1,8 @@
 #+TITLE: tog
 
-Tagging interface for NLP-ish data. Specifically for entity region tagging as
-shown here:
+[[https://travis-ci.com/Vernacular-ai/tog][https://img.shields.io/travis/com/Vernacular-ai/tog/master.svg?style=flat-square]]
+
+Tagging interface for NLP-ish data.
 
 [[file:./screen-tagged.png]]
 
