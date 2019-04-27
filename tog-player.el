@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'dash)
+(require 'f)
 
 (defvar tog-player-proc nil
   "Process related to the audio player.")
@@ -33,11 +35,19 @@
 (defvar tog-player-cache nil
   "Cache dir to look for files")
 
+(defun tog-player-cache-get (url)
+  "Return path of local file for the given url."
+  (when tog-player-cache
+    (let ((local-file (f-join tog-player-cache (f-filename url))))
+      (when (f-exists? local-file)
+        local-file))))
+
 (defun tog-player-play (url)
-  "Play the current url."
+  "Play given url, possible from local cache."
   (let ((player "mplayer"))
     (if tog-player-proc (delete-process tog-player-proc))
-    (setq tog-player-proc (start-process "tog-player" nil program url))))
+    (--if-let (tog-player-cache-get url) (setq url it))
+    (setq tog-player-proc (start-process "tog-player" nil player url))))
 
 (provide 'tog-player)
 

@@ -21,6 +21,9 @@
 (define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
 
+;; Cache dir for audios
+(setq tog-player-cache (expand-file-name "./audios/"))
+
 ;; NOTE: Here is a pipeline for tagging entities
 (setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
 (setq tog-method 'ranged)
