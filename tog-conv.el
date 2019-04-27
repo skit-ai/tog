@@ -110,10 +110,38 @@ tag of same type."
 TODO: We don't merge multiple broken utterances."
   (mapcar (lambda (it) (gethash "transcript" it)) (aref (oref obj :alternatives) 0)))
 
-(cl-defmethod ranged-alt-tags ((obj tog-conv) alt-index)
-  "Return ranged tags present for the alternative index."
-  (-filter (lambda (t) (--if-let (alist-get 'alt-index t) (and (= alt-index it) (alist-get 'text-range t))))
-           (oref obj :tag)))
+(cl-defmethod ranged-alt-tags ((obj tog-conv) &optional alt-index)
+  "Return ranged tags present on obj."
+  (if (null alt-index)
+      (-filter (lambda (t) (alist-get 'text-range t)) (oref obj :tag))
+    (-filter (lambda (t)
+               (--if-let (alist-get 'alt-index t)
+                   (and (= alt-index it) (alist-get 'text-range t))))
+             (oref obj :tag))))
+
+(cl-defmethod tog-show-ranged-tags ((obj tog-conv))
+  "Display alternative texts and ranged tags for current buffer."
+  (let ((i 0))
+    (dolist (text (texts obj))
+      (insert (number-to-string i) ". " text)
+      ;; Highlight tags that are applied in this conversation
+      (save-excursion
+        (dolist (tag (ranged-alt-tags obj i))
+          (goto-char (line-beginning-position))
+          (re-search-forward "^[0-9]+\. ")
+          (let ((range (alist-get 'text-range tag)))
+            (goto-char (+ (point) (car range)))
+            (set-mark-command nil)
+            (goto-char (+ (point) (- (cadr range) (car range))))
+            (setq deactivate-mark nil))
+          (tog-hl-mark (alist-get 'type tag))))
+      (insert "\n")
+      (incf i))))
+
+(cl-defmethod tog-show-all-tags ((obj tog-conv))
+  "Display all tags for current buffer item"
+  (dolist (tag (oref obj :tag))
+    (insert "# - " (format "%s" tag) "\n")))
 
 (cl-defmethod tog-show ((obj tog-conv))
   "Display a tog conv item in buffer for tagging."
@@ -129,25 +157,11 @@ TODO: We don't merge multiple broken utterances."
         (org-set-property "STATE" (oref obj :state))
         (insert "\n")
 
-        (let ((i 0))
-          (dolist (text (texts obj))
-            (insert (number-to-string i) ". " text)
-            ;; Highlight tags that are applied in this conversation
-            (save-excursion
-              (dolist (tag (ranged-alt-tags obj i))
-                (goto-char (line-beginning-position))
-                (re-search-forward "^[0-9]+\. ")
-                (let ((range (alist-get 'text-range tag)))
-                  (goto-char (+ (point) (car range)))
-                  (set-mark-command nil)
-                  (goto-char (+ (point) (- (cadr range) (car range))))
-                  (setq deactivate-mark nil))
-                (tog-hl-mark (alist-get 'type tag))))
-            (insert "\n")
-            (incf i)))
-
-        (if (oref obj :tag)
-            (org-todo "DONE"))
+        (tog-show-ranged-tags obj)
+        (when (oref obj :tag)
+          (insert "\n# All tags:\n")
+          (tog-show-all-tags obj)
+          (org-todo "DONE"))
 
         (goto-char (point-min))
         ;; This is only for putting cursor at a comfortable position
@@ -158,15 +172,22 @@ TODO: We don't merge multiple broken utterances."
 (defun tog-conv-tag ()
   "Annotate current conversation."
   (interactive)
-  (let ((tag-type (tog-input-choice tog-types "Type: ")))
+  (let ((tag-type (if (= 1 (length tog-types))
+                      (car tog-types)
+                    (tog-input-choice tog-types "Type: "))))
     (when tag-type
-      (let ((tag `((type . ,tag-type)
-                   (text . ,(tog-input-string tag-type))
-                   (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
-                   (text-range . ,(tog-parse-text-range)))))
+      ;; TODO: Generalizing this has probably made `boolean' tagging very slow,
+      ;; it can and should be fixed in some time.
+      (let ((tag  (ecase tog-method
+                    (ranged `((type . ,tag-type)
+                              (text . ,(tog-input-string tag-type))
+                              (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
+                              (text-range . ,(tog-parse-text-range))))
+                    (boolean `((type . ,tag-type)
+                               (value . ,(y-or-n-p (format "%s? " tag-type))))))))
         (update-tag (nth tog-index tog-items) tag)
         ;; TODO: This redraw gives a jittery experience but we will see later if
-        ;;       we need to optimize something
+        ;;       we need to fix that
         (tog-show (nth tog-index tog-items))))))
 
 (provide 'tog-conv)

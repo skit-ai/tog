@@ -49,6 +49,10 @@
 (defvar tog-types nil
   "Types like LOC, NAME etc. allowed for a task.")
 
+(defvar tog-method 'ranged
+  "Method of tagging to use. Possible values are `ranged',
+  `boolean' and `choice'.")
+
 (defun tog-show-current ()
   (tog-show (nth tog-index tog-items)))
 
