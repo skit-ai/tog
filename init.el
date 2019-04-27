@@ -31,7 +31,7 @@
 (tog-load)
 
 ;; NOTE: Here is a pipeline for single intent +/- tagging.
-(setq tog-types '("ATLAS-MISFIRE"))
+(setq tog-types '("LOCATION-PRESENT"))
 (setq tog-method 'boolean)
 (tog-conv-load-from-json "./alts-location.json")
 
