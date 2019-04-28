@@ -69,10 +69,9 @@ tag of same type."
 (defun tog-conv-clear ()
   "Clear current conversation."
   (interactive)
-  (let ((inhibit-read-only t))
-    (clear-tags (nth tog-index tog-items))
-    (org-todo "")
-    (dolist (o (ov-all)) (delete-overlay o))))
+  (let ((item (nth tog-index tog-items)))
+    (clear-tags item)
+    (tog-show item)))
 
 (defun make-conv (it)
   "Use parsed json hash from db to create a conversation."
