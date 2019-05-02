@@ -170,8 +170,6 @@ TODO: We don't merge multiple broken utterances."
                       (car tog-types)
                     (tog-input-choice tog-types "Type: "))))
     (when tag-type
-      ;; TODO: Generalizing this has probably made `boolean' tagging very slow,
-      ;; it can and should be fixed in some time.
       (let ((tag  (ecase tog-method
                     (ranged `((type . ,tag-type)
                               (text . ,(tog-input-string tag-type))
