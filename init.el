@@ -7,6 +7,7 @@
 (load-theme 'wombat)
 
 (require 'tog)
+(require 'tog-stats)
 
 ;; Define Keys
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
@@ -29,6 +30,7 @@
 (setq tog-method 'ranged)
 
 ;; First we load the data file with items to tag
+(tog-stats-count "./alts-dt-num.json")
 (tog-conv-load-from-json "./alts-dt-num.json")
 ;; Next, optionally, load the already done tags
 (tog-load)
@@ -36,6 +38,7 @@
 ;; NOTE: Here is a pipeline for single intent +/- tagging.
 (setq tog-types '("LOCATION-PRESENT"))
 (setq tog-method 'boolean)
+(tog-stats-count "./alts-location.json")
 (tog-conv-load-from-json "./alts-location.json")
 (tog-load)
 
