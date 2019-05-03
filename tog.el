@@ -124,7 +124,7 @@ changed but I don't feel that is ever really needed."
     (f-write (json-encode-alist tags) 'utf-8 file-path)
     (message "Tags saved at %s" file-path)))
 
-(defun tog-load ()
+(defun tog-load-tags ()
   "Load tags from the sibling file and apply to current items.
 Tags are stored as map from item-id to tag objects represented as
 list of alist."

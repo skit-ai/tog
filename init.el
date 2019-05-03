@@ -33,14 +33,14 @@
 (tog-stats-count "./alts-dt-num.json")
 (tog-conv-load-from-json "./alts-dt-num.json")
 ;; Next, optionally, load the already done tags
-(tog-load)
+(tog-load-tags)
 
 ;; NOTE: Here is a pipeline for single intent +/- tagging.
 (setq tog-types '("LOCATION-PRESENT"))
 (setq tog-method 'boolean)
 (tog-stats-count "./alts-location.json")
 (tog-conv-load-from-json "./alts-location.json")
-(tog-load)
+(tog-load-tags)
 
 ;; Hook for fast jumps
 (defun tog-conv-go-go ()
