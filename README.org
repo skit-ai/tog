@@ -1,7 +1,7 @@
 #+TITLE: tog
 
 [[https://travis-ci.com/Vernacular-ai/tog][https://img.shields.io/travis/com/Vernacular-ai/tog/master.svg?style=flat-square]]
-[[https://www.gnu.org/software/emacs/][https://img.shields.io/badge/emacs->%3D27.0-blueviolet.svg?style=flat-square]]
+[[https://www.gnu.org/software/emacs/][https://img.shields.io/badge/emacs-%3E%3D27.0-blueviolet.svg?style=flat-square]]
 
 A hackable data-tagging framework for (mostly) natural language data.
 
