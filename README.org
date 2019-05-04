@@ -2,10 +2,9 @@
 
 [[https://travis-ci.com/Vernacular-ai/tog][https://img.shields.io/travis/com/Vernacular-ai/tog/master.svg?style=flat-square]]
 
-Tagging interface for NLP-ish data.
+A hackable data-tagging framework for (mostly) natural language data.
 
 [[file:./screen-tagged.png]]
-
 
 For tagging, you can either install this package or just run Emacs standalone
 and load only tog (and its dependencies). Following steps are needed to do the
