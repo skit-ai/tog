@@ -27,7 +27,7 @@
 
 ;; NOTE: Here is a pipeline for tagging entities
 (setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
-(setq tog-method 'ranged)
+(setq tog-conv-method 'ranged)
 
 ;; First we load the data file with items to tag
 (tog-stats-count "./alts-dt-num.json")
@@ -37,7 +37,7 @@
 
 ;; NOTE: Here is a pipeline for single intent +/- tagging.
 (setq tog-types '("LOCATION-PRESENT"))
-(setq tog-method 'boolean)
+(setq tog-conv-method 'boolean)
 (tog-stats-count "./alts-location.json")
 (tog-conv-load-from-json "./alts-location.json")
 (tog-load-tags)

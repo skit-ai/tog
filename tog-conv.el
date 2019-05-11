@@ -42,6 +42,25 @@
 (defcustom tog-conv-after-tag-hook nil
   "Hook after a tag is applied.")
 
+(defvar tog-conv-method 'ranged
+  "Method of tagging to use. Possible values are:
+
+- `ranged': Ask for type and a range to highlight for that range.
+  Note that we only allow one range for a single type. This
+  should not be a problem since we can just rename the types to
+  for disambiguation. Additional fields include `text',
+  `alt-index' and `text-range'. If `text' is not provided but a
+  tag for a type is present, we assume this particular type is
+  not present in the tagged item.
+
+- `transcript': Ask for a written transcript for the
+  conversation. Fields are `text' and (optionally) `alt-index'.
+
+- `boolean': Ask if something is there or not. No extra metadata
+  is present other than `value' which keeps the boolean value (t,
+  nil). If multiple types are present, this can be used for
+  things like intent tagging.")
+
 (defclass tog-conv ()
   ((alternatives :initarg :alternatives)
    (id :initarg :id)
@@ -169,6 +188,28 @@ text in :alternatives. This does not affect the value of
         (re-search-forward "^0\. ")))
     (switch-to-buffer buffer)))
 
+(defun tog-conv-make-tag-ranged (tag-type)
+  "Make a ranged type tag based on current pointer position and
+other things."
+  `((type . ,tag-type)
+    (text . ,(tog-input-string tag-type))
+    (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
+    (text-range . ,(tog-parse-text-range))))
+
+(defun tog-conv-make-tag-boolean (tag-type)
+  "Make a boolean (t, nil) tag."
+  `((type . ,tag-type)
+    (value . ,(y-or-n-p (format "%s? " tag-type)))))
+
+(defun tog-conv-make-tag-transcript (tag-type)
+  "Make a transcription based tag. If present on an alternative,
+we take that text as the default."
+  (let* ((current-text (tog-parse-line))
+         (input-text (tog-input-string tag-type (or current-text ""))))
+    `((type . ,tag-type)
+      (text . ,input-text)
+      (alt-index . ,(and (string= input-text current-text) (tog-parse-line-id))))))
+
 ;;;###autoload
 (defun tog-conv-tag ()
   "Annotate current conversation."
@@ -177,16 +218,11 @@ text in :alternatives. This does not affect the value of
                       (car tog-types)
                     (tog-input-choice tog-types "Type: "))))
     (when tag-type
-      (let ((tag  (ecase tog-method
-                    (ranged `((type . ,tag-type)
-                              (text . ,(tog-input-string tag-type))
-                              (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
-                              (text-range . ,(tog-parse-text-range))))
-                    (boolean `((type . ,tag-type)
-                               (value . ,(y-or-n-p (format "%s? " tag-type))))))))
+      (let ((tag  (ecase tog-conv-method
+                    (transcript (tog-conv-make-tag-transcript tag-type))
+                    (ranged (tog-conv-make-tag-ranged tag-type))
+                    (boolean (tog-conv-make-tag-boolean tag-type)))))
         (update-tag (nth tog-index tog-items) tag)
-        ;; TODO: This redraw gives a jittery experience but we will see later if
-        ;;       we need to fix that
         (tog-show (nth tog-index tog-items))
         (run-hooks 'tog-conv-after-tag-hook)))))
 

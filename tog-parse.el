@@ -37,6 +37,15 @@ text goes like:
       (when (re-search-forward pattern (line-end-position) t)
         (string-to-number (match-string-no-properties 1))))))
 
+(defun tog-parse-line (&optional pattern)
+  "Parse line string. PATTERN identifies the part to take by
+specifying group number 1."
+  (let ((pattern (or pattern "^[[:digit:]]\. \\(.*\\)")))
+    (save-excursion
+      (goto-char (line-beginning-position))
+      (when (re-search-forward pattern (line-end-position) t)
+        (match-string-no-properties 1)))))
+
 (defun tog-parse-text-range (&optional pattern)
   "Return marked range relative to the text. PATTERN identifies
 the parts to ignore. If defaults to the usual assumption about

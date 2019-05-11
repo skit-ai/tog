@@ -57,22 +57,6 @@ using an `id' key.")
 is present in the list, we assume that to be the default while
 tagging.")
 
-(defvar tog-method 'ranged
-  "Method of tagging to use. Possible values are:
-
-- `ranged': Ask for type and a range to highlight for that range.
-  Note that we only allow one range for a single type. This
-  should not be a problem since we can just rename the types to
-  for disambiguation. Additional fields include `text',
-  `alt-index' and `text-range'. If `text' is not provided but a
-  tag for a type is present, we assume this particular type is
-  not present in the tagged item.
-
-- `boolean': Ask if something is there or not. No extra metadata
-  is present other than `value' which keeps the boolean value (t,
-  nil). If multiple types are present, this can be used for
-  things like intent tagging.")
-
 (defun tog-goto (idx)
   "Jump to idx item for tagging. Boundary handling is done in
 this function so the caller need not worry about anything other
