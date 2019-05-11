@@ -1,7 +1,6 @@
 #+TITLE: tog
 
 [[https://travis-ci.com/Vernacular-ai/tog][https://img.shields.io/travis/com/Vernacular-ai/tog/master.svg?style=flat-square]]
-[[https://www.gnu.org/software/emacs/][https://img.shields.io/badge/emacs-%3E%3D27.0-blueviolet.svg?style=flat-square]]
 
 A hackable data-tagging framework for (mostly) natural language data.
 
@@ -14,7 +13,3 @@ later:
 1. Install Emacs and [[https://github.com/cask/cask][cask]].
 2. In this directory run ~cask install~ to install dependencies locally.
 3. Check ~./init.el~.
-
-You might need to build Emacs (>= 27.0) with native json support. For older
-versions we can have polyfills for few ~json-read*~ functions but it's not high on
-priority as of now.

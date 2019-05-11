@@ -83,8 +83,12 @@ tag of same type."
 
 (defun tog-conv-load-from-json (file-path)
   "Read conversations dictionaries from json."
-  (setq tog-items (mapcar #'make-conv (json-parse-string (f-read file-path)))
-        tog-source-file file-path))
+  ;; TODO: Check whether there is performance gain if we switch to the C
+  ;;       json-parse-string function.
+  (let ((json-object-type 'hash-table)
+        (json-array-type 'vector))
+    (setq tog-items (mapcar #'make-conv (json-read-file file-path))
+          tog-source-file file-path)))
 
 (defun tog-conv-play ()
   "Command for playing current item."
