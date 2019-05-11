@@ -100,7 +100,11 @@ tag of same type."
 
 (cl-defmethod texts ((obj tog-conv))
   "Return a list of texts in the alternatives.
-TODO: We don't merge multiple broken utterances."
+
+NOTE: We don't merge multiple broken utterances. The assumption
+is that the data generator takes care of this and gives us merged
+text in :alternatives. This does not affect the value of
+:alternatives which might be present in :prediction."
   (mapcar (lambda (it) (gethash "transcript" it)) (aref (oref obj :alternatives) 0)))
 
 (cl-defmethod ranged-alt-tags ((obj tog-conv) &optional alt-index)
