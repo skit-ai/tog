@@ -27,7 +27,6 @@
 ;;; Code:
 
 (require 'eieio)
-(require 'helm)
 (require 'json)
 (require 'f)
 (require 'ov)
