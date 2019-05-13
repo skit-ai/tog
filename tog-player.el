@@ -35,6 +35,9 @@
 (defvar tog-player-cache nil
   "Cache dir to look for files")
 
+(defcustom tog-player-command "mplayer"
+  "Command for the cli audio player")
+
 (defun tog-player-cache-get (url)
   "Return path of local file for the given url."
   (when tog-player-cache
@@ -44,10 +47,9 @@
 
 (defun tog-player-play (url)
   "Play given url, possible from local cache."
-  (let ((player "mplayer"))
-    (if tog-player-proc (delete-process tog-player-proc))
-    (--if-let (tog-player-cache-get url) (setq url it))
-    (setq tog-player-proc (start-process "tog-player" nil player url))))
+  (if tog-player-proc (delete-process tog-player-proc))
+  (--if-let (tog-player-cache-get url) (setq url it))
+  (setq tog-player-proc (start-process "tog-player" nil tog-player-command url)))
 
 (provide 'tog-player)
 

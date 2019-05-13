@@ -24,6 +24,7 @@
 
 ;; Cache dir for audios
 (setq tog-player-cache (expand-file-name "./audios/"))
+(setq tog-player-command "mplayer") ;; sox, cvlc etc.
 
 ;; ---------------------------------
 ;; Setup for tagging ranged entities
