@@ -156,7 +156,7 @@ text in :alternatives. This does not affect the value of
             (setq deactivate-mark nil))
           (tog-hl-mark (alist-get 'type tag))))
       (insert "\n")
-      (incf i))))
+      (cl-incf i))))
 
 (cl-defmethod tog-show-all-tags ((obj tog-conv))
   "Display all tags for current buffer item"
@@ -218,7 +218,7 @@ we take that text as the default."
                       (car tog-types)
                     (tog-input-choice tog-types "Type: "))))
     (when tag-type
-      (let ((tag  (ecase tog-conv-method
+      (let ((tag  (cl-ecase tog-conv-method
                     (transcript (tog-conv-make-tag-transcript tag-type))
                     (ranged (tog-conv-make-tag-ranged tag-type))
                     (boolean (tog-conv-make-tag-boolean tag-type)))))
