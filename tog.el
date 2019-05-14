@@ -40,6 +40,9 @@
 kind of tagging. Note that only one kind of tagging can happen at
 a given time.")
 
+(defcustom tog-next-hook nil
+  "Hook after next is pressed.")
+
 (defvar tog-source-file nil
   "Path to the json source file where we have the data. The
 assumption is that the file contains a list of dictionaries each
@@ -70,7 +73,8 @@ this function so the caller need not worry about anything other
 (defun tog-next ()
   "Go to next item for tagging."
   (interactive)
-  (tog-goto (+ tog-index 1)))
+  (tog-goto (+ tog-index 1))
+  (run-hooks 'tog-next-hook))
 
 (defun tog-next-untagged ()
   "Go to next item which is untagged, ignoring current one."
@@ -79,7 +83,8 @@ this function so the caller need not worry about anything other
     (while (and (oref (nth jump-index tog-items) :tag)
                 (< jump-index (length tog-items)))
       (cl-incf jump-index))
-    (tog-goto jump-index)))
+    (tog-goto jump-index)
+    (run-hooks 'tog-next-hook)))
 
 (defun tog-prev-untagged ()
   "Go to previous item which is untagged, ignoring current one."
