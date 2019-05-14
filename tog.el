@@ -31,6 +31,7 @@
 
 (require 'cl-lib)
 (require 'f)
+(require 's)
 (require 'tog-conv)
 (require 'tog-progress)
 
@@ -99,8 +100,9 @@ this function so the caller need not worry about anything other
 name as the source file and add a suffix to it. This can be
 changed but I don't feel that is ever really needed."
   (interactive)
-  (let ((file-path (concat tog-source-file ".tog"))
-        (tags))
+  (let* ((canon-source-file (s-chop-suffix ".gz" tog-source-file))
+         (file-path (concat canon-source-file ".tog"))
+         (tags))
     (dolist (it tog-items)
       (if (oref it :tag)
           ;; JSON needs string keys
