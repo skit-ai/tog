@@ -191,10 +191,13 @@ text in :alternatives. This does not affect the value of
 (defun tog-conv-make-tag-ranged (tag-type)
   "Make a ranged type tag based on current pointer position and
 other things."
-  `((type . ,tag-type)
-    (text . ,(tog-input-string tag-type))
-    (alt-index . ,(and (region-active-p) (tog-parse-line-id)))
-    (text-range . ,(tog-parse-text-range))))
+  (let* ((current-text (region-text))
+         (input-text (tog-input-string tag-type))
+         (text-same-p (string= input-text current-text)))
+    `((type . ,tag-type)
+      (text . ,input-text)
+      (alt-index . ,(and (region-active-p) text-same-p (tog-parse-line-id)))
+      (text-range . ,(and text-same-p (tog-parse-text-range))))))
 
 (defun tog-conv-make-tag-boolean (tag-type)
   "Make a boolean (t, nil) tag."
