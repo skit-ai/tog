@@ -95,6 +95,19 @@ this function so the caller need not worry about anything other
       (cl-decf jump-index))
     (tog-goto jump-index)))
 
+(defun tog-last-tagged ()
+  "Go to the last tagged item"
+  (interactive)
+  (let ((tagged-index)
+        (i 0))
+    (while (< i (length tog-items))
+      (when (oref (nth i tog-items) :tag)
+        (setq tagged-index i))
+      (cl-incf i))
+    (if tagged-index
+        (tog-goto tagged-index)
+      (message "No items tagged"))))
+
 (defun tog-prev ()
   "Go to previous item for tagging."
   (interactive)
