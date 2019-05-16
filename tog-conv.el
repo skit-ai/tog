@@ -42,6 +42,9 @@
 (defcustom tog-conv-after-tag-hook nil
   "Hook after a tag is applied.")
 
+(defcustom tog-conv-timezone "Asia/Kolkata"
+  "Timezone to enforce on displayed items")
+
 (defvar tog-conv-method 'ranged
   "Method of tagging to use. Possible values are:
 
@@ -165,14 +168,15 @@ text in :alternatives. This does not affect the value of
 
 (cl-defmethod tog-show ((obj tog-conv))
   "Display a tog conv item in buffer for tagging."
-  (let ((buffer (get-buffer-create tog-buffer-name)))
+  (let ((buffer (get-buffer-create tog-buffer-name))
+        (local-iso-time (format-time-string "%FT%T%z" (date-to-time (oref obj :reftime)) tog-conv-timezone)))
     (with-current-buffer buffer
       (let ((inhibit-read-only t))
         (dolist (o (ov-all)) (delete-overlay o))
         (delete-region (point-min) (point-max))
         (tog-mode)
         (insert "* item " (number-to-string (oref obj :id)) "\n")
-        (org-set-property "REFTIME" (oref obj :reftime))
+        (org-set-property "REFTIME" local-iso-time)
         (org-set-property "CALL-URL" (call-url obj))
         (org-set-property "STATE" (oref obj :state))
         (insert "\n")
