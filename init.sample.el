@@ -41,6 +41,7 @@
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-location.json")
 (tog-load-tags)
+(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 
 ;; Hook for fast jumps
 (defun tog-conv-go-go ()
@@ -58,6 +59,7 @@
 (setq tog-conv-method 'transcript)
 (tog-conv-load-from-json "./conv-transcript.json")
 (tog-load-tags)
+(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 (tog)
 
 ;; --------------------------
@@ -67,6 +69,7 @@
 (setq tog-conv-method 'ranged)
 (tog-conv-load-from-json "./conv-location.json")
 (tog-load-tags)
+(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 (tog)
 
 ;; ------------------------
@@ -76,4 +79,5 @@
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-intent.json")
 (tog-load-tags)
+(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 (tog)
