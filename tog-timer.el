@@ -29,7 +29,7 @@
 (defvar tog-timer-start-time nil
   "Time when we started tagging.")
 
-(defvar tog-timer-done-count nil
+(defvar tog-timer-done-count 0
   "Counts of items done in current tagging session")
 
 (defun tog-timer-start ()
@@ -40,7 +40,7 @@
 (defun tog-timer-reset ()
   "Reset time values and other logs."
   (setq tog-timer-start-time nil
-        tog-timer-done-count nil))
+        tog-timer-done-count 0))
 
 (defun tog-timer-update (&optional increment)
   "Update count of done items for this session."
@@ -60,11 +60,6 @@ timing."
   (let ((time-diff (- (float-time) tog-timer-start-time)))
     (when (not (zerop tog-timer-done-count))
       (/ time-diff tog-timer-done-count))))
-
-(defun tog-timer-show-progress (n-left)
-  (let ((speed (tog-timer-speed)))
-    (format "Time left to do %s items: %s [%s per item]"
-            n-left (seconds-to-string (* n-left speed)) (seconds-to-string speed))))
 
 (provide 'tog-timer)
 

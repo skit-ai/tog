@@ -28,6 +28,7 @@
 
 (require 'dash)
 (require 's)
+(require 'tog-timer)
 
 (defun tog-progress-done ()
   "Return count of done items. This works over all the items and
@@ -51,6 +52,17 @@ not only for the current session."
       (concat (tog-progress-build-bar current-pos)
               current-pos-marker
               (tog-progress-build-bar (- n-done current-pos 1))))))
+
+(defun tog-progress-session-report ()
+  "Display (in message for now) update on the progress of current
+session."
+  (interactive)
+  (let ((n-left (- (length tog-items) (tog-progress-done)))
+        (speed (tog-timer-speed)))
+    (message "Total items: %s\nTime left to do %s items: %s [%s per item]"
+             (length tog-items) n-left
+             (if speed (seconds-to-string (* n-left speed)) "NA")
+             (if speed (seconds-to-string speed) "NA"))))
 
 (provide 'tog-progress)
 

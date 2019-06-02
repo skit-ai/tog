@@ -18,6 +18,8 @@
 (define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
 
+(define-key tog-mode-map (kbd "t") 'tog-progress-session-report)
+
 ;; Cache dir for audios
 (setq tog-player-cache (expand-file-name "./audios/"))
 (setq tog-player-command "mplayer") ;; sox, cvlc etc.
@@ -31,6 +33,7 @@
 (tog-conv-load-from-json "./conv-dt-num.json")
 ;; Next, optionally, load the already done tags
 (tog-load-tags)
+(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 ;; Start the tagging
 (tog)
 
