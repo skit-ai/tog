@@ -27,7 +27,7 @@
 ;; ---------------------------------
 ;; Setup for tagging ranged entities
 ;; ---------------------------------
-(setq tog-types '("PEOPLE" "DATE" "TIME" "NUMBER" "DATETIME"))
+(setq tog-types '("PEOPLE" "DATE" "TIME" "DATETIME"))
 (setq tog-conv-method 'ranged)
 ;; First we load the data file with items to tag
 (tog-conv-load-from-json "./conv-dt-num.json")
