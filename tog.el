@@ -34,6 +34,7 @@
 (require 's)
 (require 'tog-conv)
 (require 'tog-progress)
+(require 'tog-timer)
 
 (defcustom tog-buffer-name "*tog*"
   "Name of the tagging buffer. This is the shared buffer for all
@@ -163,6 +164,7 @@ list of alist."
   (if (null tog-items)
       (message "No data loaded, try running a loader.")
     (setq tog-index -1)
+    (tog-timer-start)
     (tog-next)))
 
 ;;;###autoload
@@ -176,7 +178,8 @@ because of an screw up while tagging."
   (setq tog-items nil
         tog-index nil
         tog-source-file nil
-        tog-types nil))
+        tog-types nil)
+  (tog-timer-reset))
 
 (provide 'tog)
 

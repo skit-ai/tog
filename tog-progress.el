@@ -30,7 +30,8 @@
 (require 's)
 
 (defun tog-progress-done ()
-  "Return count of done items"
+  "Return count of done items. This works over all the items and
+not only for the current session."
   (-reduce-from (lambda (acc it) (if (oref it :tag) (+ acc 1) acc)) 0 tog-items))
 
 (defun tog-progress-build-bar (n)
