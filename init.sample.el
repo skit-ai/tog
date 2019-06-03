@@ -4,6 +4,7 @@
 
 (require 'tog)
 (require 'tog-stats)
+(require 'cl-lib)
 
 ;; Define Keys
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
@@ -81,6 +82,43 @@
 (setq tog-types '("some-intent" "another-intent"))
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-intent.json")
+(tog-load-tags)
+(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(tog)
+
+;; --------------
+;; Tags from json
+;; --------------
+
+;; In such cases, each item from the json needs to be parsed in pairs of
+;; (search-string, tag).
+;; For example: ("place-one, that old city, this country etc." . "place-one")
+;; In helm, we will show the descriptions (car) of the pairs and keep
+;; tag (cdr) as the output.
+
+(defun parse-location--value (value)
+  "Return a string from the location json item value."
+  (cl-etypecase value
+    (string value)
+    (list (s-join " " (cl-remove-if #'null (mapcar #'parse-location--value value))))
+    (number nil)))
+
+(defun parse-location-item (item)
+  "Make a tog-type from given json item."
+  (let* ((id (alist-get 'id item))
+         (main-text (concat (parse-location--value (alist-get 'key item)) " " (alist-get 'city item)))
+         (ignore-keys '(google_place_id city key))
+         (rest-values (mapcar #'cdr (cl-remove-if (lambda (kv) (member (car kv) ignore-keys)) item)))
+         (rest-text (s-join " " (cl-remove-if #'null (mapcar #'parse-location--value rest-values)))))
+    (cons (format "id %d: %s\n\n%s" id main-text rest-text)
+          (number-to-string id))))
+
+(let ((file "./location-records.json")
+      (json-array-type 'list))
+  (setq tog-types (mapcar #'parse-location-item (json-read-file file))))
+
+(setq tog-conv-method 'ranged)
+(tog-conv-load-from-json "./conv-location.json.gz")
 (tog-load-tags)
 (add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 (tog)
