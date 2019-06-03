@@ -37,7 +37,8 @@
 (defun tog-input-choice (options &optional prompt)
   "Return one from given"
   (helm :sources (helm-build-sync-source "tog-input-choice"
-                   :candidates options)
+                   :candidates options
+                   :multiline t)
         :buffer "*helm tog input choice*"
         :prompt (or prompt "Choice: ")))
 
