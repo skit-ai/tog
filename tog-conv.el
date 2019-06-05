@@ -64,6 +64,9 @@
   nil). If multiple types are present, this can be used for
   things like intent tagging.")
 
+(defcustom tog-conv-prefill-prompt nil
+  "Tell whether to fill marked region in tag prompt while tagging")
+
 (defclass tog-conv ()
   ((alternatives :initarg :alternatives)
    (id :initarg :id)
@@ -221,9 +224,11 @@ we take that text as the default."
 (defun tog-conv-tag ()
   "Annotate current conversation."
   (interactive)
-  (let ((tag-type (if (= 1 (length tog-types))
-                      (car tog-types)
-                    (tog-input-choice tog-types "Type: "))))
+  (let* ((prefill-text (when (and tog-conv-prefill-prompt (region-active-p))
+                         (region-text)))
+         (tag-type (if (= 1 (length tog-types))
+                       (car tog-types)
+                     (tog-input-choice tog-types "Type: " prefill-text))))
     (when tag-type
       (let ((tag  (cl-ecase tog-conv-method
                     (transcript (tog-conv-make-tag-transcript tag-type))

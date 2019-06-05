@@ -34,13 +34,14 @@
   (let ((entry (read-string (format "%s> " name) (or default (region-text)))))
     (if (string= entry "") nil entry)))
 
-(defun tog-input-choice (options &optional prompt)
+(defun tog-input-choice (options &optional prompt input)
   "Return one from given"
   (helm :sources (helm-build-sync-source "tog-input-choice"
                    :candidates options
                    :multiline t)
         :buffer "*helm tog input choice*"
-        :prompt (or prompt "Choice: ")))
+        :prompt (or prompt "Choice: ")
+        :input input))
 
 (provide 'tog-input)
 
