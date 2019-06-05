@@ -5,6 +5,7 @@
 (require 'tog)
 (require 'tog-stats)
 (require 'cl-lib)
+(require 'dash)
 
 ;; Define Keys
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
@@ -103,20 +104,34 @@
     (list (s-join " " (cl-remove-if #'null (mapcar #'parse-location--value value))))
     (number nil)))
 
-(defun parse-location-item (item)
+(defun make-location-tag (record)
   "Make a tog-type from given json item."
-  (let* ((id (alist-get 'id item))
-         (main-text (concat (parse-location--value (alist-get 'key item)) " " (alist-get 'city item)))
+  (let* ((id (alist-get 'id record))
+         (main-text (concat (parse-location--value (alist-get 'key record)) " " (alist-get 'city record)))
          (ignore-keys '(google_place_id city key))
-         (rest-values (mapcar #'cdr (cl-remove-if (lambda (kv) (member (car kv) ignore-keys)) item)))
+         (rest-values (mapcar #'cdr (cl-remove-if (lambda (kv) (member (car kv) ignore-keys)) record)))
          (rest-text (s-join " " (cl-remove-if #'null (mapcar #'parse-location--value rest-values)))))
     (cons (format "id %d: %s\n\n%s" id main-text rest-text)
           (number-to-string id))))
 
-(let ((file "./location-records.json")
-      (json-array-type 'list))
-  (setq tog-types (mapcar #'parse-location-item (json-read-file file))))
+(defun make-city-tags (records)
+  "Create tags for city names from given records."
+  (let ((city-alist (mapcar (lambda (rec) (cons (alist-get 'city rec)
+                                           (alist-get 'city_id rec)))
+                            records)))
+    (mapcar (lambda (pair) (cons (format "city-id %d: %s" (cdr pair) (car pair))
+                            (format "c%d" (cdr pair))))
+            (-uniq city-alist))))
 
+(let* ((file "./location.json")
+       (json-array-type 'list)
+       (records (json-read-file file)))
+  (setq tog-types (append (mapcar #'make-location-tag records)
+                          (make-city-tags records)
+                          ;; NOTE: -1 means there is no record match
+                          (list (cons "id -1: NA" "-1")))))
+
+(setq tog-conv-prefill-prompt t)
 (setq tog-conv-method 'ranged)
 (tog-conv-load-from-json "./conv-location.json.gz")
 (tog-load-tags)
