@@ -108,7 +108,7 @@
   "Make a tog-type from given json item."
   (let* ((id (alist-get 'id record))
          (main-text (concat (parse-location--value (alist-get 'key record)) " " (alist-get 'city record)))
-         (ignore-keys '(google_place_id city key))
+         (ignore-keys '(google_place_id city key location))
          (rest-values (mapcar #'cdr (cl-remove-if (lambda (kv) (member (car kv) ignore-keys)) record)))
          (rest-text (s-join " " (cl-remove-if #'null (mapcar #'parse-location--value rest-values)))))
     (cons (format "id %d: %s\n\n%s" id main-text rest-text)
