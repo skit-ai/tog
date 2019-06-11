@@ -11,8 +11,10 @@
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
 (define-key tog-mode-map (kbd "n") 'tog-next)
 (define-key tog-mode-map (kbd "N") 'tog-next-untagged)
+(define-key tog-mode-map (kbd "F") 'tog-next-intent)
 (define-key tog-mode-map (kbd "p") 'tog-prev)
 (define-key tog-mode-map (kbd "P") 'tog-prev-untagged)
+(define-key tog-mode-map (kbd "B") 'tog-prev-intent)
 (define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
 
 (define-key tog-mode-map (kbd "DEL") 'tog-conv-clear)
