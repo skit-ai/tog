@@ -71,38 +71,11 @@ this function so the caller need not worry about anything other
   (cond ((= tog-index 0) (message "Reached first item"))
         ((= tog-index (- (length tog-items) 1)) (message "Reached last item"))))
 
-(defun tog-conv-intent-p (tog-item intent)
-  "Check if the tog-item has particular intent present in it or
-not. "
-  (let ((intents (mapcar (lambda (x) (alist-get 'type x)) (oref tog-item :tag))))
-    (member intent intents)
-  )
-)
-
 (defun tog-next ()
   "Go to next item for tagging."
   (interactive)
   (tog-goto (+ tog-index 1))
   (run-hooks 'tog-next-hook))
-
-(defun tog-next-intent ()
-  "Go to next item which has a particular type, ignoring current one. DEFAULT: _other_"
-  (interactive)
-  (let ((jump-index (+ tog-index 1)))
-    (while (and (< jump-index (length tog-items))
-                (not (tog-conv-intent-p (nth jump-index tog-items) "_other_")))
-      (cl-incf jump-index))
-    (tog-goto jump-index)
-    (run-hooks 'tog-next-hook)))
-
-(defun tog-prev-intent ()
-  "Go to previous item which has a particular type, ignoring current one. DEFAULT: _other_"
-  (interactive)
-  (let ((jump-index (- tog-index 1)))
-    (while (and (>= jump-index 0)
-                (not (tog-conv-intent-p (nth jump-index tog-items) "_other_")))
-      (cl-decf jump-index))
-    (tog-goto jump-index)))
 
 (defun tog-next-untagged ()
   "Go to next item which is untagged, ignoring current one."

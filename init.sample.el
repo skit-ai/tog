@@ -11,10 +11,8 @@
 (define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
 (define-key tog-mode-map (kbd "n") 'tog-next)
 (define-key tog-mode-map (kbd "N") 'tog-next-untagged)
-(define-key tog-mode-map (kbd "F") 'tog-next-intent)
 (define-key tog-mode-map (kbd "p") 'tog-prev)
 (define-key tog-mode-map (kbd "P") 'tog-prev-untagged)
-(define-key tog-mode-map (kbd "B") 'tog-prev-intent)
 (define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
 
 (define-key tog-mode-map (kbd "DEL") 'tog-conv-clear)
@@ -139,3 +137,31 @@
 (tog-load-tags)
 (add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
 (tog)
+
+;; Temporary functions for intent jumps
+
+(defun tog-next-intent ()
+  "Go to next item which has a particular type, ignoring current one. DEFAULT: _other_"
+  (interactive)
+  (let ((jump-index (+ tog-index 1)))
+    (while (and (< jump-index (length tog-items))
+                (not (tog-conv-intent-p (nth jump-index tog-items) "_other_")))
+      (cl-incf jump-index))
+    (tog-goto jump-index)
+    (run-hooks 'tog-next-hook)))
+
+(defun tog-prev-intent ()
+  "Go to previous item which has a particular type, ignoring current one. DEFAULT: _other_"
+  (interactive)
+  (let ((jump-index (- tog-index 1)))
+    (while (and (>= jump-index 0)
+                (not (tog-conv-intent-p (nth jump-index tog-items) "_other_")))
+      (cl-decf jump-index))
+    (tog-goto jump-index)))
+
+
+(defun tog-conv-intent-p (tog-item intent)
+  "Check if the tog-item has particular intent present in it or
+not. "
+  (let ((intents (mapcar (lambda (x) (alist-get 'type x)) (oref tog-item :tag))))
+    (member intent intents)))
