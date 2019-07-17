@@ -166,9 +166,6 @@ text in :alternatives. This does not affect the value of
         (local-iso-time (format-time-string "%FT%T%z" (date-to-time (oref obj :reftime)) tog-conv-timezone)))
     (with-current-buffer buffer
       (let ((inhibit-read-only t))
-        (dolist (o (ov-all)) (delete-overlay o))
-        (delete-region (point-min) (point-max))
-        (tog-mode)
         (insert "* item " (number-to-string (oref obj :id)) "\n")
         (org-set-property "REFTIME" local-iso-time)
         (org-set-property "CALL-URL" (call-url obj))
@@ -183,8 +180,7 @@ text in :alternatives. This does not affect the value of
 
         (goto-char (point-min))
         ;; This is only for putting cursor at a comfortable position
-        (re-search-forward "^0\. ")))
-    (switch-to-buffer buffer)))
+        (re-search-forward "^0\. ")))))
 
 (defun tog-conv-make-tag-ranged (tag-type)
   "Make a ranged type tag based on current pointer position and

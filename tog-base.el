@@ -28,14 +28,27 @@
 
 (require 'eieio)
 
-;; Forward declaration
+;; Forward declarations
 (defvar tog-annotate-hook)
+(defvar tog-buffer-name)
 
 (defclass tog-item ()
   ((id :initarg :id)
    (tag :initarg :tag :initform nil))
   :abstract t
   :documentation "Base class specifying an item to present while tagging.")
+
+(cl-defmethod tog-show :before ((obj tog-item))
+  "Before method which cleans up the buffer"
+  (let ((buffer (get-buffer-create tog-buffer-name)))
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (dolist (o (ov-all)) (delete-overlay o))
+        (erase-buffer)
+        (tog-mode)))))
+
+(cl-defmethod tog-show :after ((obj tog-item))
+  (switch-to-buffer (get-buffer-create tog-buffer-name)))
 
 (cl-defgeneric tog-add-tag ((obj tog-item) tag)
   "Add given tag to the object")
