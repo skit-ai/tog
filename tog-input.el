@@ -60,7 +60,7 @@ duration limit so that an accident don't throw us out of memory.")
   "Ask for audio from user and return file path."
   (let ((output-file (f-join tog-input-audio-dir rec-id)))
     (tog-input-start-recording)
-    (read-string "Press RET when done.")
+    (read-string "Press RET when done speaking ")
     (tog-input-stop-recording output-file)
     output-file))
 
