@@ -58,7 +58,7 @@ duration limit so that an accident don't throw us out of memory.")
 
 (defun tog-input-audio (rec-id)
   "Ask for audio from user and return file path."
-  (let ((output-file (f-join tog-input-audio-dir rec-id)))
+  (let ((output-file (f-join tog-input-audio-dir (f-swap-ext rec-id "wav"))))
     (tog-input-start-recording)
     (read-string "Press RET when done speaking ")
     (tog-input-stop-recording output-file)
