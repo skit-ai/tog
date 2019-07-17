@@ -32,6 +32,7 @@
 (require 'cl-lib)
 (require 'f)
 (require 's)
+(require 'tog-base)
 (require 'tog-conv)
 (require 'tog-progress)
 (require 'tog-timer)

@@ -32,6 +32,7 @@
 (require 'ov)
 (require 's)
 (require 'dash)
+(require 'tog-base)
 (require 'tog-hl)
 (require 'tog-utils)
 (require 'tog-parse)
@@ -45,7 +46,7 @@
 (defcustom tog-conv-timezone "Asia/Kolkata"
   "Timezone to enforce on displayed items")
 
-(defvar tog-conv-method 'ranged
+(defcustom tog-conv-method 'ranged
   "Method of tagging to use. Possible values are:
 
 - `ranged': Ask for type and a range to highlight for that range.
@@ -67,14 +68,12 @@
 (defcustom tog-conv-prefill-prompt nil
   "Tell whether to fill marked region in tag prompt while tagging")
 
-(defclass tog-conv ()
+(defclass tog-conv (tog-item)
   ((alternatives :initarg :alternatives)
-   (id :initarg :id)
    (reftime :initarg :reftime)
    (audio-url :initarg :audio-url)
    (state :initarg :state)
-   (metadata :initarg :metadata)
-   (tag :initarg :tag :initform nil))
+   (metadata :initarg :metadata))
   "A conversation (turn) for a call.")
 
 (defun tog-conv-tag-same-type (ta tb)
@@ -85,10 +84,6 @@
   "Apply tag to a conversation. This overrides an already present
 tag of same type."
   (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) (oref obj :tag))))
-
-(cl-defmethod clear-tags ((obj tog-conv))
-  "Remove all tags from the item."
-  (oset obj :tag nil))
 
 (defun tog-conv-clear ()
   "Clear current conversation."
