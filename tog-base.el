@@ -29,7 +29,7 @@
 (require 'eieio)
 
 ;; Forward declaration
-(defvar tog-tag-hook)
+(defvar tog-annotate-hook)
 
 (defclass tog-item ()
   ((id :initarg :id)
@@ -37,13 +37,15 @@
   :abstract t
   :documentation "Base class specifying an item to present while tagging.")
 
-(cl-defmethod clear-tags ((obj tog-item))
-  "Remove all tags from the item."
+(cl-defgeneric tog-add-tag ((obj tog-item) tag)
+  "Add given tag to the object")
+
+(cl-defmethod tog-clear-tag ((obj tog-item))
   (oset obj :tag nil))
 
-(cl-defmethod tog-tag :after ((obj tog-item))
+(cl-defmethod tog-annotate :after ((obj tog-item))
   "After method for running tag-hook"
-  (run-hooks 'tog-tag-hook))
+  (run-hooks 'tog-annotate-hook))
 
 (provide 'tog-base)
 

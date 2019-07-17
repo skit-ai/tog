@@ -43,6 +43,11 @@
 (defcustom tog-conv-timezone "Asia/Kolkata"
   "Timezone to enforce on displayed items")
 
+(defcustom tog-conv-types nil
+  "Types like LOC, NAME etc. allowed for a task. If only one item
+is present in the list, we assume that to be the default while
+tagging.")
+
 (defcustom tog-conv-method 'ranged
   "Method of tagging to use. Possible values are:
 
@@ -77,17 +82,10 @@
   "Tell if two tag objects are equal in type."
   (string= (alist-get 'type ta) (alist-get 'type tb)))
 
-(cl-defmethod update-tag ((obj tog-conv) tag)
+(cl-defmethod tog-add-tag ((obj tog-conv) tag)
   "Apply tag to a conversation. This overrides an already present
 tag of same type."
   (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) (oref obj :tag))))
-
-(defun tog-conv-clear ()
-  "Clear current conversation."
-  (interactive)
-  (let ((item (nth tog-index tog-items)))
-    (clear-tags item)
-    (tog-show item)))
 
 (defun make-conv (it)
   "Use parsed json hash from db to create a conversation."
@@ -110,10 +108,11 @@ tag of same type."
 (defun tog-conv-play ()
   "Command for playing current item."
   (interactive)
-  (let ((url (oref (nth tog-index tog-items) :audio-url)))
-    (if (not url)
-        (message "No audio found for this conversation")
-      (tog-player-play url))))
+  (with-current-tog-item
+   (let ((url (oref current-item :audio-url)))
+     (if (not url)
+         (message "No audio found for this conversation")
+       (tog-player-play url)))))
 
 (cl-defmethod call-url ((obj tog-conv))
   "Return metabase call url."
@@ -152,7 +151,7 @@ text in :alternatives. This does not affect the value of
             (set-mark-command nil)
             (goto-char (+ (point) (- (cadr range) (car range))))
             (setq deactivate-mark nil))
-          (tog-hl-mark (alist-get 'type tag))))
+          (tog-hl-mark (alist-get 'type tag) tog-conv-types)))
       (insert "\n")
       (cl-incf i))))
 
@@ -212,22 +211,19 @@ we take that text as the default."
       (text . ,input-text)
       (alt-index . ,(and (string= input-text current-text) (tog-parse-line-id))))))
 
-;;;###autoload
-(defun tog-conv-tag ()
-  "Annotate current conversation."
-  (interactive)
+(cl-defmethod tog-annotate ((obj tog-conv))
+  "Annotate a tog-conv item."
   (let* ((prefill-text (when (and tog-conv-prefill-prompt (region-active-p))
                          (region-text)))
-         (tag-type (if (= 1 (length tog-types))
-                       (car tog-types)
-                     (tog-input-choice tog-types "Type: " prefill-text))))
+         (tag-type (if (= 1 (length tog-conv-types))
+                       (car tog-conv-types)
+                     (tog-input-choice tog-conv-types "Type: " prefill-text))))
     (when tag-type
       (let ((tag  (cl-ecase tog-conv-method
                     (transcript (tog-conv-make-tag-transcript tag-type))
                     (ranged (tog-conv-make-tag-ranged tag-type))
                     (boolean (tog-conv-make-tag-boolean tag-type)))))
-        (update-tag (nth tog-index tog-items) tag)
-        (tog-show (nth tog-index tog-items))))))
+        (tog-add-tag obj tag)))))
 
 (provide 'tog-conv)
 

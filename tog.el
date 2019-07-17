@@ -45,7 +45,7 @@ a given time.")
 (defcustom tog-goto-hook nil
   "Hook for any goto event.")
 
-(defcustom tog-tag-hook nil
+(defcustom tog-annotate-hook nil
   "Hook after a tag is applied.")
 
 (defvar tog-source-file nil
@@ -60,11 +60,6 @@ using an `id' key.")
 
 (defvar tog-index nil
   "Index of current item being tagged in the list `tog-items'.")
-
-(defvar tog-types nil
-  "Types like LOC, NAME etc. allowed for a task. If only one item
-is present in the list, we assume that to be the default while
-tagging.")
 
 (defun tog-goto (idx)
   "Jump to idx item for tagging. Boundary handling is done in
@@ -151,7 +146,7 @@ list of alist."
             (if (= (oref tog-item :id)
                    (string-to-number (symbol-name (car tag-data))))
                 (dolist (tag (cdr tag-data))
-                  (update-tag tog-item tag)))))))))
+                  (tog-add-tag tog-item tag)))))))))
 
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
@@ -161,8 +156,7 @@ list of alist."
 
 ;;;###autoload
 (defun tog ()
-  "Start tagging after the variables `tog-items', `tog-types' and
-`tog-method' are all set."
+  "Start tagging."
   (interactive)
   (if (null tog-items)
       (message "No data loaded, try running a loader.")
@@ -170,18 +164,30 @@ list of alist."
     (tog-timer-start)
     (tog-next)))
 
+(defun tog-tag ()
+  "Command to initiate tag collection for current tog-item."
+  (interactive)
+  (let ((current-item (nth tog-index tog-items)))
+    (tog-annotate current-item)
+    (tog-show current-item)))
+
+(defun tog-clear ()
+  "Command to clear tag for current item."
+  (interactive)
+  (let ((current-item (nth tog-index tog-items)))
+    (tog-clear-tag current-item)
+    (tog-show current-item)))
+
 ;;;###autoload
 (defun tog-quit ()
   "Exit and cleanup. We don't save before exiting by default
-since this might do bad things to tag file if the user is exiting
-because of an screw up while tagging."
+since this might do bad things to tag file because of certain
+screw ups while tagging."
   (interactive)
   (when (get-buffer tog-buffer-name)
     (kill-buffer tog-buffer-name))
   (setq tog-items nil
-        tog-index nil
-        tog-source-file nil
-        tog-types nil)
+        tog-index nil)
   (tog-timer-reset))
 
 (provide 'tog)

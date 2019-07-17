@@ -29,9 +29,6 @@
 (require 'cl-lib)
 (require 'ov)
 
-;; Variables defined elsewhere
-(defvar tog-types)
-
 (defcustom tog-hl-palette
   '(("#f1c40f" . "#191d24")
     ("#3498db" . "#191d24")
@@ -41,10 +38,10 @@
 We are not going the full faces way but will be moving there if
 needed.")
 
-(defun tog-hl-props-for-type (tag-type)
+(defun tog-hl-props-for-type (tag-type all-types)
   "Return extra face related attributes for the tog type to go in
 overlays."
-  (let* ((idx (or (cl-position tag-type tog-types :test 'equal) 0))
+  (let* ((idx (or (cl-position tag-type all-types :test 'equal) 0))
          (colors (nth (% idx (length tog-hl-palette)) tog-hl-palette)))
     `(face (:background ,(car colors) :foreground ,(cdr colors))
            ,@(if tag-type
@@ -54,11 +51,11 @@ overlays."
                                                 :background ,(cdr colors)
                                                 :foreground ,(car colors))))))))
 
-(defun tog-hl-mark (tag-type)
+(defun tog-hl-mark (tag-type all-types)
   "Highlight the current region using the given type"
   (if (not (region-active-p))
       (message "No region active for highlighting")
-    (ov (region-beginning) (region-end) (tog-hl-props-for-type tag-type))))
+    (ov (region-beginning) (region-end) (tog-hl-props-for-type tag-type all-types))))
 
 (defun tog-hl-unmark (arg)
   "Remove mark from current position. If arg is not nil, clear

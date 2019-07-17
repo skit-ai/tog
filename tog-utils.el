@@ -28,6 +28,10 @@
 
 (require 'dash)
 
+;; Forward declarations
+(defvar tog-index)
+(defvar tog-items)
+
 (defun line-text ()
   "Return text in the current line."
   (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
@@ -41,6 +45,10 @@
   (-if-let (match-idx (-find-index pred list))
       (-replace-at match-idx item list)
     (cons item list)))
+
+(defmacro with-current-tog-item (&rest body)
+  `(let ((current-item (nth tog-index tog-items)))
+     ,@body))
 
 (provide 'tog-utils)
 

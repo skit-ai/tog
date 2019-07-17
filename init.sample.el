@@ -6,20 +6,19 @@
 (require 'cl-lib)
 (require 'dash)
 
-;; Define Keys
-(define-key tog-mode-map (kbd "RET") 'tog-conv-tag)
+;; Define general keys
+(define-key tog-mode-map (kbd "RET") 'tog-tag)
 (define-key tog-mode-map (kbd "n") 'tog-next)
 (define-key tog-mode-map (kbd "N") 'tog-next-untagged)
 (define-key tog-mode-map (kbd "p") 'tog-prev)
 (define-key tog-mode-map (kbd "P") 'tog-prev-untagged)
-(define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
-
-(define-key tog-mode-map (kbd "DEL") 'tog-conv-clear)
-
-(define-key tog-mode-map (kbd "q") 'tog-quit)
+(define-key tog-mode-map (kbd "DEL") 'tog-clear)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
-
+(define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "t") 'tog-progress-session-report)
+
+;; Conversation tagging specific keys
+(define-key tog-mode-map (kbd "SPC") 'tog-conv-play)
 
 ;; Cache dir for audios
 (setq tog-player-cache (expand-file-name "./audios/"))
@@ -28,24 +27,24 @@
 ;; ---------------------------------
 ;; Setup for tagging ranged entities
 ;; ---------------------------------
-(setq tog-types '("PEOPLE" "DATE" "TIME" "DATETIME"))
+(setq tog-conv-types '("PEOPLE" "DATE" "TIME" "DATETIME"))
 (setq tog-conv-method 'ranged)
 ;; First we load the data file with items to tag
 (tog-conv-load-from-json "./conv-dt-num.json")
 ;; Next, optionally, load the already done tags
 (tog-load-tags)
-(add-hook 'tog-tag-hook #'tog-timer-update)
+(add-hook 'tog-annotate-hook #'tog-timer-update)
 ;; Start the tagging
 (tog)
 
 ;; -----------------------------------
 ;; Setup for single intent +/- tagging
 ;; -----------------------------------
-(setq tog-types '("LOCATION-PRESENT"))
+(setq tog-conv-types '("LOCATION-PRESENT"))
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-location.json")
 (tog-load-tags)
-(add-hook 'tog-tag-hook #'tog-timer-update)
+(add-hook 'tog-annotate-hook #'tog-timer-update)
 
 ;; Hook for fast jumps
 (defun tog-conv-go-go ()
@@ -53,37 +52,37 @@
   (tog-conv-play)
   (tog-conv-tag))
 
-(add-hook 'tog-tag-hook #'tog-conv-go-go)
+(add-hook 'tog-annotate-hook #'tog-conv-go-go)
 (tog)
 
 ;; -----------------------
 ;; Setup for transcription
 ;; -----------------------
-(setq tog-types '("TRANSCRIPT"))
+(setq tog-conv-types '("TRANSCRIPT"))
 (setq tog-conv-method 'transcript)
 (tog-conv-load-from-json "./conv-transcript.json")
 (tog-load-tags)
-(add-hook 'tog-tag-hook #'tog-timer-update)
+(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
 
 ;; --------------------------
 ;; Setup for single range NER
 ;; --------------------------
-(setq tog-types '("LOCATION"))
+(setq tog-conv-types '("LOCATION"))
 (setq tog-conv-method 'ranged)
 (tog-conv-load-from-json "./conv-location.json")
 (tog-load-tags)
-(add-hook 'tog-tag-hook #'tog-timer-update)
+(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
 
 ;; ------------------------
 ;; Setup for intent tagging
 ;; ------------------------
-(setq tog-types '("some-intent" "another-intent"))
+(setq tog-conv-types '("some-intent" "another-intent"))
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-intent.json")
 (tog-load-tags)
-(add-hook 'tog-tag-hook #'tog-timer-update)
+(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
 
 ;; --------------
@@ -125,7 +124,7 @@
 (let* ((file "./location.json")
        (json-array-type 'list)
        (records (json-read-file file)))
-  (setq tog-types (append (mapcar #'make-location-tag records)
+  (setq tog-conv-types (append (mapcar #'make-location-tag records)
                           (make-city-tags records)
                           ;; NOTE: -1 means there is no record match
                           (list (cons "id -1: NA" "-1")))))
@@ -134,5 +133,5 @@
 (setq tog-conv-method 'ranged)
 (tog-conv-load-from-json "./conv-location.json.gz")
 (tog-load-tags)
-(add-hook 'tog-tag-hook #'tog-timer-update)
+(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
