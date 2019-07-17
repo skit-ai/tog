@@ -34,7 +34,7 @@
 (tog-conv-load-from-json "./conv-dt-num.json")
 ;; Next, optionally, load the already done tags
 (tog-load-tags)
-(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(add-hook 'tog-tag-hook #'tog-timer-update)
 ;; Start the tagging
 (tog)
 
@@ -45,7 +45,7 @@
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-location.json")
 (tog-load-tags)
-(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(add-hook 'tog-tag-hook #'tog-timer-update)
 
 ;; Hook for fast jumps
 (defun tog-conv-go-go ()
@@ -53,7 +53,7 @@
   (tog-conv-play)
   (tog-conv-tag))
 
-(add-hook 'tog-conv-after-tag-hook #'tog-conv-go-go)
+(add-hook 'tog-tag-hook #'tog-conv-go-go)
 (tog)
 
 ;; -----------------------
@@ -63,7 +63,7 @@
 (setq tog-conv-method 'transcript)
 (tog-conv-load-from-json "./conv-transcript.json")
 (tog-load-tags)
-(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(add-hook 'tog-tag-hook #'tog-timer-update)
 (tog)
 
 ;; --------------------------
@@ -73,7 +73,7 @@
 (setq tog-conv-method 'ranged)
 (tog-conv-load-from-json "./conv-location.json")
 (tog-load-tags)
-(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(add-hook 'tog-tag-hook #'tog-timer-update)
 (tog)
 
 ;; ------------------------
@@ -83,7 +83,7 @@
 (setq tog-conv-method 'boolean)
 (tog-conv-load-from-json "./conv-intent.json")
 (tog-load-tags)
-(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(add-hook 'tog-tag-hook #'tog-timer-update)
 (tog)
 
 ;; --------------
@@ -134,33 +134,5 @@
 (setq tog-conv-method 'ranged)
 (tog-conv-load-from-json "./conv-location.json.gz")
 (tog-load-tags)
-(add-hook 'tog-conv-after-tag-hook #'tog-timer-update)
+(add-hook 'tog-tag-hook #'tog-timer-update)
 (tog)
-
-;; Temporary functions for intent jumps
-
-(defun tog-next-intent ()
-  "Go to next item which has a particular type, ignoring current one. DEFAULT: _other_"
-  (interactive)
-  (let ((jump-index (+ tog-index 1)))
-    (while (and (< jump-index (length tog-items))
-                (not (tog-conv-intent-p (nth jump-index tog-items) "_other_")))
-      (cl-incf jump-index))
-    (tog-goto jump-index)
-    (run-hooks 'tog-next-hook)))
-
-(defun tog-prev-intent ()
-  "Go to previous item which has a particular type, ignoring current one. DEFAULT: _other_"
-  (interactive)
-  (let ((jump-index (- tog-index 1)))
-    (while (and (>= jump-index 0)
-                (not (tog-conv-intent-p (nth jump-index tog-items) "_other_")))
-      (cl-decf jump-index))
-    (tog-goto jump-index)))
-
-
-(defun tog-conv-intent-p (tog-item intent)
-  "Check if the tog-item has particular intent present in it or
-not. "
-  (let ((intents (mapcar (lambda (x) (alist-get 'type x)) (oref tog-item :tag))))
-    (member intent intents)))

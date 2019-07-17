@@ -28,6 +28,9 @@
 
 (require 'eieio)
 
+;; Forward declaration
+(defvar tog-tag-hook)
+
 (defclass tog-item ()
   ((id :initarg :id)
    (tag :initarg :tag :initform nil))
@@ -37,6 +40,10 @@
 (cl-defmethod clear-tags ((obj tog-item))
   "Remove all tags from the item."
   (oset obj :tag nil))
+
+(cl-defmethod tog-tag :after ((obj tog-item))
+  "After method for running tag-hook"
+  (run-hooks 'tog-tag-hook))
 
 (provide 'tog-base)
 

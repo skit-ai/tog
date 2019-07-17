@@ -42,8 +42,11 @@
 kind of tagging. Note that only one kind of tagging can happen at
 a given time.")
 
-(defcustom tog-next-hook nil
-  "Hook after next is pressed.")
+(defcustom tog-goto-hook nil
+  "Hook for any goto event.")
+
+(defcustom tog-tag-hook nil
+  "Hook after a tag is applied.")
 
 (defvar tog-source-file nil
   "Path to the json source file where we have the data. The
@@ -70,13 +73,13 @@ this function so the caller need not worry about anything other
   (setq tog-index (min (- (length tog-items) 1) (max 0 idx)))
   (tog-show (nth tog-index tog-items))
   (cond ((= tog-index 0) (message "Reached first item"))
-        ((= tog-index (- (length tog-items) 1)) (message "Reached last item"))))
+        ((= tog-index (- (length tog-items) 1)) (message "Reached last item")))
+  (run-hooks 'tog-goto-hook))
 
 (defun tog-next ()
   "Go to next item for tagging."
   (interactive)
-  (tog-goto (+ tog-index 1))
-  (run-hooks 'tog-next-hook))
+  (tog-goto (+ tog-index 1)))
 
 (defun tog-next-untagged ()
   "Go to next item which is untagged, ignoring current one."
@@ -85,8 +88,7 @@ this function so the caller need not worry about anything other
     (while (and (oref (nth jump-index tog-items) :tag)
                 (< jump-index (length tog-items)))
       (cl-incf jump-index))
-    (tog-goto jump-index)
-    (run-hooks 'tog-next-hook)))
+    (tog-goto jump-index)))
 
 (defun tog-prev-untagged ()
   "Go to previous item which is untagged, ignoring current one."

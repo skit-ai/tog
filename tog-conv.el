@@ -40,9 +40,6 @@
 (require 'tog-input)
 
 
-(defcustom tog-conv-after-tag-hook nil
-  "Hook after a tag is applied.")
-
 (defcustom tog-conv-timezone "Asia/Kolkata"
   "Timezone to enforce on displayed items")
 
@@ -230,8 +227,7 @@ we take that text as the default."
                     (ranged (tog-conv-make-tag-ranged tag-type))
                     (boolean (tog-conv-make-tag-boolean tag-type)))))
         (update-tag (nth tog-index tog-items) tag)
-        (tog-show (nth tog-index tog-items))
-        (run-hooks 'tog-conv-after-tag-hook)))))
+        (tog-show (nth tog-index tog-items))))))
 
 (provide 'tog-conv)
 
