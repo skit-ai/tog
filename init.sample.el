@@ -3,7 +3,6 @@
 (add-to-list 'load-path default-directory)
 
 (require 'tog)
-(require 'tog-stats)
 (require 'cl-lib)
 (require 'dash)
 
