@@ -29,6 +29,41 @@
 (require 'helm)
 (require 'tog-utils)
 
+(defcustom tog-input-audio-dir nil
+  "Directory to keep recorded audios in.")
+
+(defcustom tog-input-arecord-args (list "-f" "S16_LE" "-r" "48000" "-c" "2" "-d" "600")
+  "Arguments to send to arecord while recording. We put a max
+duration limit so that an accident don't throw us out of memory.")
+
+(defvar tog-input-arecord-proc nil
+  "Variable holding the process used for recording.")
+
+(defun tog-input-start-recording ()
+  "Start recording audio."
+  (let* ((tmp-file (make-temp-file "tog-input-audio"))
+         (args (append tog-input-arecord-args (list ">" (shell-quote-argument tmp-file)))))
+    (setq tog-input-arecord-proc (start-process-shell-command "arecord" nil (string-join (cons "arecord" args) " ")))
+    (process-put tog-input-arecord-proc 'output-file tmp-file)))
+
+(defun tog-input-stop-recording (output-file)
+  "Stop recording and save wav output in OUTPUT-FILE."
+  ;; NOTE: arecord takes kill (almost) gracefully but leaves the recording time
+  ;;       wrong, so we fix it manually using sox
+  (kill-process tog-input-arecord-proc)
+  (let ((tmp-file (process-get tog-input-arecord-proc 'output-file)))
+    (call-process "sox" nil nil nil "--ignore-length" tmp-file output-file)
+    (setq tog-input-arecord-proc nil)
+    (delete-file tmp-file)))
+
+(defun tog-input-audio (rec-id)
+  "Ask for audio from user and return file path."
+  (let ((output-file (f-join tog-input-audio-dir rec-id)))
+    (tog-input-start-recording)
+    (read-string "Press RET when done.")
+    (tog-input-stop-recording output-file)
+    output-file))
+
 (defun tog-input-string (name &optional default)
   "Ask for input string from user."
   (let ((entry (read-string (format "%s> " name) (or default (region-text)))))
