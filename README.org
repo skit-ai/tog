@@ -6,7 +6,7 @@ A hackable Emacs based data-tagging framework.
 
 [[file:./screen-tagged.png]]
 
-* Installation and Usage
+** Installation and Usage
 
 You will need Emacs (not tested on version below 26). Recommended way for
 installing Emacs Lisp dependencies is to install [[https://github.com/cask/cask][cask]] and do ~cask install~ here.
@@ -21,14 +21,14 @@ tools:
 2. ~arecord~ and ~sox~ for recording audio. These are only need if your tagger uses
    ~tog-input-audio~ functions.
 
-* Creating a tagger
+** Creating a tagger
 
 Working with and creating a tog tagger needs the user to define:
 
 1. Data loader for loading and saving data
 2. A ~tog-item~ class and few of it's methods
 
-** Data loader
+*** Data loader
 
 A loader takes care of keeping and navigating around the data items being tagged
 or to be tagged. It also defines mechanism for saving and loading tags.
@@ -42,7 +42,7 @@ There are plans for supporting better loaders and serialization formats. A
 closer to completion one is where we stream data bidirectionally for active
 learning. These will be implemented by extending the classes in ~tog-io~ package.
 
-** Tog item
+*** Tog item
 
 An item to tag is defined by creating a class that inherits from ~tog-item~ class.
 The default slots there are ~id,~ which uniquely identifies the item, and ~tag~
@@ -75,7 +75,7 @@ Also let's setup the list of intents somewhere
 
 Next, the following functions/methods need to be defined:
 
-*** Factory function
+**** Factory function
 A factory function that creates an object of the above class based on an input
 data structure decided by the data loader.
 
@@ -105,7 +105,7 @@ hashtables, our factory function can be the following:
 #+RESULTS:
 : make-tog-text-item
 
-*** ~tog-add-tag~
+**** ~tog-add-tag~
 This adds a tag to an item. Here is an example for the current intent tagging
 case. Assuming that the tag is just a string and each item can get multiple such
 tags, we can do something like this:
@@ -119,7 +119,7 @@ tags, we can do something like this:
 #+RESULTS:
 : tog-add-tag
 
-*** ~tog-show~
+**** ~tog-show~
 This defines how the item is going to be rendered in the ~tog-mode~ buffer. Since
 ~tog-mode~ inherits from ~org-mode~, you can use various org mode functions. For our
 simple case, we will just show the item ~id~, ~text~ and current ~tag~ in separate
@@ -140,7 +140,7 @@ lines.
 #+RESULTS:
 : tog-show
 
-*** ~tog-annotate~
+**** ~tog-annotate~
 This method defines what happens when we start annotating the currently
 displayed item. In out case, we will just ask for an intent from the user and
 add to the current item:
@@ -172,13 +172,13 @@ After (wrong) tagging, the tags are saved here:
 #+RESULTS:
 : {"2":["goodbye","greeting"],"1":["greeting"]}
 
-* Hooks
+** Hooks
 
 1. ~tog-nav-hook~ is called whenever we navigate to any item. This can be useful
    for setting up things like auto key presses for tagging speed up.
 2. ~tog-annotate-hook~ is called after every annotation act.
 
-* Keybindings
+** Keybindings
 
 Important general commands are listed and bound to sensible defaults in
 ~./init.sample.el~. Check the file for more details.
