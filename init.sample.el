@@ -37,7 +37,6 @@
 (setq tog-loader (make-tog-io-json-loader "./conv-region.json" #'make-tog-conv-item))
 ;; Next, optionally, load the already done tags
 (tog-load-tags)
-(add-hook 'tog-annotate-hook #'tog-timer-update)
 ;; Start the tagging
 (tog)
 
@@ -48,7 +47,6 @@
 (setq tog-conv-method 'boolean)
 (setq tog-loader (make-tog-io-json-loader "./conv-location.json" #'make-tog-conv-item))
 (tog-load-tags)
-(add-hook 'tog-annotate-hook #'tog-timer-update)
 
 ;; Hook for fast jumps
 (defun tog-conv-go-go ()
@@ -66,7 +64,6 @@
 (setq tog-conv-method 'transcript)
 (setq tog-loader (make-tog-io-json-loader "./conv-transcript.json" #'make-tog-conv-item))
 (tog-load-tags)
-(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
 
 ;; --------------------------
@@ -76,7 +73,6 @@
 (setq tog-conv-method 'ranged)
 (setq tog-loader (make-tog-io-json-loader "./conv-location.json" #'make-tog-conv-item))
 (tog-load-tags)
-(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
 
 ;; ------------------------
@@ -86,7 +82,6 @@
 (setq tog-conv-method 'boolean)
 (setq tog-loader (make-tog-io-json-loader "./conv-intent.json" #'make-tog-conv-item))
 (tog-load-tags)
-(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
 
 ;; --------------
@@ -137,5 +132,4 @@
 (setq tog-conv-method 'ranged)
 (setq tog-loader (make-tog-io-json-loader "./conv-location.json.gz" #'make-tog-conv-item))
 (tog-load-tags)
-(add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)

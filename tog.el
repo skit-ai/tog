@@ -46,7 +46,7 @@ a given time.")
 (defcustom tog-nav-hook nil
   "Hook for any navigation event.")
 
-(defcustom tog-annotate-hook nil
+(defcustom tog-annotate-hook (list #'tog-timer-update)
   "Hook after a tag is applied.")
 
 (defvar tog-loader nil
