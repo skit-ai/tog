@@ -127,7 +127,7 @@ text in :alternatives. This does not affect the value of
                    (and (= alt-index it) (alist-get 'text-range t))))
              (oref obj :tag))))
 
-(cl-defmethod tog-show-ranged-tags ((obj tog-conv-item))
+(cl-defmethod tog-render-ranged-tags ((obj tog-conv-item))
   "Display alternative texts and ranged tags for current buffer."
   (let ((i 0))
     (dolist (text (texts obj))
@@ -146,32 +146,29 @@ text in :alternatives. This does not affect the value of
       (insert "\n")
       (cl-incf i))))
 
-(cl-defmethod tog-show-all-tags ((obj tog-conv-item))
+(cl-defmethod tog-render-all-tags ((obj tog-conv-item))
   "Display all tags for current buffer item"
   (dolist (tag (oref obj :tag))
     (insert "# - " (format "%s" tag) "\n")))
 
-(cl-defmethod tog-show ((obj tog-conv-item))
+(cl-defmethod tog-render ((obj tog-conv-item))
   "Display a tog conv item in buffer for tagging."
-  (let ((buffer (get-buffer-create tog-buffer-name))
-        (local-iso-time (format-time-string "%FT%T%z" (date-to-time (oref obj :reftime)) tog-conv-timezone)))
-    (with-current-buffer buffer
-      (let ((inhibit-read-only t))
-        (insert "* item " (number-to-string (oref obj :id)) "\n")
-        (org-set-property "REFTIME" local-iso-time)
-        (org-set-property "CALL-URL" (call-url obj))
-        (org-set-property "STATE" (oref obj :state))
-        (insert "\n")
+  (let ((local-iso-time (format-time-string "%FT%T%z" (date-to-time (oref obj :reftime)) tog-conv-timezone)))
+    (insert "* item " (number-to-string (oref obj :id)) "\n")
+    (org-set-property "REFTIME" local-iso-time)
+    (org-set-property "CALL-URL" (call-url obj))
+    (org-set-property "STATE" (oref obj :state))
+    (insert "\n")
 
-        (tog-show-ranged-tags obj)
-        (when (oref obj :tag)
-          (insert "\n# All tags:\n")
-          (tog-show-all-tags obj)
-          (org-todo "DONE"))
+    (tog-render-ranged-tags obj)
+    (when (oref obj :tag)
+      (insert "\n# All tags:\n")
+      (tog-render-all-tags obj)
+      (org-todo "DONE"))
 
-        (goto-char (point-min))
-        ;; This is only for putting cursor at a comfortable position
-        (re-search-forward "^0\. ")))))
+    (goto-char (point-min))
+    ;; This is only for putting cursor at a comfortable position
+    (re-search-forward "^0\. ")))
 
 (defun tog-conv-make-tag-ranged (tag-type)
   "Make a ranged type tag based on current pointer position and

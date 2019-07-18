@@ -119,7 +119,7 @@ tags, we can do something like this:
 #+RESULTS:
 : tog-add-tag
 
-**** ~tog-show~
+**** ~tog-render~
 This defines how the item is going to be rendered in the ~tog-mode~ buffer. Since
 ~tog-mode~ inherits from ~org-mode~, you can use various org mode functions. For our
 simple case, we will just show the item ~id~, ~text~ and current ~tag~ in separate
@@ -127,18 +127,15 @@ lines.
 
 #+begin_src emacs-lisp
   ;; Note that we are provided a clean buffer with tog mode on
-  (cl-defmethod tog-show ((obj tog-text-item))
-    (with-current-buffer (get-buffer-create tog-buffer-name)
-      ;; TODO: Probably should not need this read-only thingy
-      (let ((inhibit-read-only t))
-        (insert "id  : " (number-to-string (oref obj :id)) "\n")
-        (insert "text: " (oref obj :text) "\n")
-        ;; Also showing the currently applied tags
-        (insert "tags: " (string-join (oref obj :tag) ", ")))))
+  (cl-defmethod tog-render ((obj tog-text-item))
+    (insert "id  : " (number-to-string (oref obj :id)) "\n")
+    (insert "text: " (oref obj :text) "\n")
+    ;; Also showing the currently applied tags
+    (insert "tags: " (string-join (oref obj :tag) ", ")))
 #+end_src
 
 #+RESULTS:
-: tog-show
+: tog-render
 
 **** ~tog-annotate~
 This method defines what happens when we start annotating the currently
