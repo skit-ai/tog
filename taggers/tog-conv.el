@@ -70,7 +70,7 @@ tagging.")
 (defcustom tog-conv-prefill-prompt nil
   "Tell whether to fill marked region in tag prompt while tagging")
 
-(defclass tog-conv (tog-item)
+(defclass tog-conv-item (tog-item)
   ((alternatives :initarg :alternatives)
    (reftime :initarg :reftime)
    (audio-url :initarg :audio-url)
@@ -87,14 +87,14 @@ tagging.")
 tag of same type."
   (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) (oref obj :tag))))
 
-(defun make-conv (it)
+(defun make-tog-conv-item (it)
   "Use parsed json hash from db to create a conversation."
-  (tog-conv :alternatives (gethash "alternatives" it)
-            :id (gethash "conversation_id" it)
-            :reftime (gethash "reftime" it)
-            :audio-url (gethash "audio_url" it)
-            :state (s-replace-all '(("_" . "-")) (gethash "state" it))
-            :metadata `((call-id . ,(gethash "call_id" it)))))
+  (tog-conv-item :alternatives (gethash "alternatives" it)
+                 :id (gethash "conversation_id" it)
+                 :reftime (gethash "reftime" it)
+                 :audio-url (gethash "audio_url" it)
+                 :state (s-replace-all '(("_" . "-")) (gethash "state" it))
+                 :metadata `((call-id . ,(gethash "call_id" it)))))
 
 (defun tog-conv-load-from-json (file-path)
   "Read conversations dictionaries from json."
@@ -102,7 +102,7 @@ tag of same type."
   ;;       json-parse-string function.
   (let ((json-object-type 'hash-table)
         (json-array-type 'vector))
-    (setq tog-items (mapcar #'make-conv (json-read-file file-path))
+    (setq tog-items (mapcar #'make-tog-conv-item (json-read-file file-path))
           tog-source-file file-path)))
 
 (defun tog-conv-play ()
