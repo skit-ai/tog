@@ -76,8 +76,8 @@ Also let's setup the list of intents somewhere
 Next, the following functions/methods need to be defined:
 
 **** Factory function
-A factory function that creates an object of the above class based on an input
-data structure decided by the data loader.
+A factory function creates an object of the above class based on an input data
+structure decided by the data loader.
 
 For a simple JSON loader, the factory function takes a hash-table and returns
 the newly created object. For this example, we assume that our data is kept like
