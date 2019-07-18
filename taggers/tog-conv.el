@@ -78,15 +78,6 @@ tagging.")
    (metadata :initarg :metadata))
   "A conversation (turn) for a call.")
 
-(defun tog-conv-tag-same-type (ta tb)
-  "Tell if two tag objects are equal in type."
-  (string= (alist-get 'type ta) (alist-get 'type tb)))
-
-(cl-defmethod tog-add-tag ((obj tog-conv) tag)
-  "Apply tag to a conversation. This overrides an already present
-tag of same type."
-  (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) (oref obj :tag))))
-
 (defun make-tog-conv-item (it)
   "Use parsed json hash from db to create a conversation."
   (tog-conv-item :alternatives (gethash "alternatives" it)
@@ -96,14 +87,14 @@ tag of same type."
                  :state (s-replace-all '(("_" . "-")) (gethash "state" it))
                  :metadata `((call-id . ,(gethash "call_id" it)))))
 
-(defun tog-conv-load-from-json (file-path)
-  "Read conversations dictionaries from json."
-  ;; TODO: Check whether there is performance gain if we switch to the C
-  ;;       json-parse-string function.
-  (let ((json-object-type 'hash-table)
-        (json-array-type 'vector))
-    (setq tog-items (mapcar #'make-tog-conv-item (json-read-file file-path))
-          tog-source-file file-path)))
+(defun tog-conv-tag-same-type (ta tb)
+  "Tell if two tag objects are equal in type."
+  (string= (alist-get 'type ta) (alist-get 'type tb)))
+
+(cl-defmethod tog-add-tag ((obj tog-conv-item) tag)
+  "Apply tag to a conversation. This overrides an already present
+tag of same type."
+  (oset obj :tag (upsert tag (lambda (it) (tog-conv-tag-same-type tag it)) (oref obj :tag))))
 
 (defun tog-conv-play ()
   "Command for playing current item."
@@ -114,11 +105,11 @@ tag of same type."
          (message "No audio found for this conversation")
        (tog-player-play url)))))
 
-(cl-defmethod call-url ((obj tog-conv))
+(cl-defmethod call-url ((obj tog-conv-item))
   "Return metabase call url."
   (format "https://metabase.vernacular.ai/question/38?call_id=%s" (alist-get 'call-id (oref obj :metadata))))
 
-(cl-defmethod texts ((obj tog-conv))
+(cl-defmethod texts ((obj tog-conv-item))
   "Return a list of texts in the alternatives.
 
 NOTE: We don't merge multiple broken utterances. The assumption
@@ -127,7 +118,7 @@ text in :alternatives. This does not affect the value of
 :alternatives which might be present in :prediction."
   (mapcar (lambda (it) (gethash "transcript" it)) (aref (oref obj :alternatives) 0)))
 
-(cl-defmethod ranged-alt-tags ((obj tog-conv) &optional alt-index)
+(cl-defmethod ranged-alt-tags ((obj tog-conv-item) &optional alt-index)
   "Return ranged tags present on obj."
   (if (null alt-index)
       (-filter (lambda (t) (alist-get 'text-range t)) (oref obj :tag))
@@ -136,7 +127,7 @@ text in :alternatives. This does not affect the value of
                    (and (= alt-index it) (alist-get 'text-range t))))
              (oref obj :tag))))
 
-(cl-defmethod tog-show-ranged-tags ((obj tog-conv))
+(cl-defmethod tog-show-ranged-tags ((obj tog-conv-item))
   "Display alternative texts and ranged tags for current buffer."
   (let ((i 0))
     (dolist (text (texts obj))
@@ -155,12 +146,12 @@ text in :alternatives. This does not affect the value of
       (insert "\n")
       (cl-incf i))))
 
-(cl-defmethod tog-show-all-tags ((obj tog-conv))
+(cl-defmethod tog-show-all-tags ((obj tog-conv-item))
   "Display all tags for current buffer item"
   (dolist (tag (oref obj :tag))
     (insert "# - " (format "%s" tag) "\n")))
 
-(cl-defmethod tog-show ((obj tog-conv))
+(cl-defmethod tog-show ((obj tog-conv-item))
   "Display a tog conv item in buffer for tagging."
   (let ((buffer (get-buffer-create tog-buffer-name))
         (local-iso-time (format-time-string "%FT%T%z" (date-to-time (oref obj :reftime)) tog-conv-timezone)))
@@ -207,7 +198,7 @@ we take that text as the default."
       (text . ,input-text)
       (alt-index . ,(and (string= input-text current-text) (tog-parse-line-id))))))
 
-(cl-defmethod tog-annotate ((obj tog-conv))
+(cl-defmethod tog-annotate ((obj tog-conv-item))
   "Annotate a tog-conv item."
   (let* ((prefill-text (when (and tog-conv-prefill-prompt (region-active-p))
                          (region-text)))

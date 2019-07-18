@@ -17,7 +17,7 @@
 (define-key tog-mode-map (kbd "p") 'tog-prev)
 (define-key tog-mode-map (kbd "P") 'tog-prev-untagged)
 (define-key tog-mode-map (kbd "DEL") 'tog-clear)
-(define-key tog-mode-map (kbd "C-x C-s") 'tog-save)
+(define-key tog-mode-map (kbd "C-x C-s") 'tog-save-tags)
 (define-key tog-mode-map (kbd "q") 'tog-quit)
 (define-key tog-mode-map (kbd "t") 'tog-progress-session-report)
 
@@ -34,7 +34,7 @@
 (setq tog-conv-types '("PEOPLE" "DATE" "TIME" "DATETIME"))
 (setq tog-conv-method 'ranged)
 ;; First we load the data file with items to tag
-(tog-conv-load-from-json "./conv-dt-num.json")
+(setq tog-loader (make-tog-io-json-loader "../ai/plute/analyses/bbq/data/tog/conv-dt-people.0000-00-00.1.json.gz" #'make-tog-conv-item))
 ;; Next, optionally, load the already done tags
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
@@ -46,7 +46,7 @@
 ;; -----------------------------------
 (setq tog-conv-types '("LOCATION-PRESENT"))
 (setq tog-conv-method 'boolean)
-(tog-conv-load-from-json "./conv-location.json")
+(setq tog-loader (make-tog-io-json-loader "./conv-location.json" #'make-tog-conv-item))
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
 
@@ -54,7 +54,7 @@
 (defun tog-conv-go-go ()
   (tog-next)
   (tog-conv-play)
-  (tog-conv-tag))
+  (tog-tag))
 
 (add-hook 'tog-annotate-hook #'tog-conv-go-go)
 (tog)
@@ -64,7 +64,7 @@
 ;; -----------------------
 (setq tog-conv-types '("TRANSCRIPT"))
 (setq tog-conv-method 'transcript)
-(tog-conv-load-from-json "./conv-transcript.json")
+(setq tog-loader (make-tog-io-json-loader "./conv-transcript.json" #'make-tog-conv-item))
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
@@ -74,7 +74,7 @@
 ;; --------------------------
 (setq tog-conv-types '("LOCATION"))
 (setq tog-conv-method 'ranged)
-(tog-conv-load-from-json "./conv-location.json")
+(setq tog-loader (make-tog-io-json-loader "./conv-location.json" #'make-tog-conv-item))
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
@@ -84,7 +84,7 @@
 ;; ------------------------
 (setq tog-conv-types '("some-intent" "another-intent"))
 (setq tog-conv-method 'boolean)
-(tog-conv-load-from-json "./conv-intent.json")
+(setq tog-loader (make-tog-io-json-loader "./conv-intent.json" #'make-tog-conv-item))
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)
@@ -129,13 +129,13 @@
        (json-array-type 'list)
        (records (json-read-file file)))
   (setq tog-conv-types (append (mapcar #'make-location-tag records)
-                          (make-city-tags records)
-                          ;; NOTE: -1 means there is no record match
-                          (list (cons "id -1: NA" "-1")))))
+                               (make-city-tags records)
+                               ;; NOTE: -1 means there is no record match
+                               (list (cons "id -1: NA" "-1")))))
 
 (setq tog-conv-prefill-prompt t)
 (setq tog-conv-method 'ranged)
-(tog-conv-load-from-json "./conv-location.json.gz")
+(setq tog-loader (make-tog-io-json-loader "./conv-location.json.gz" #'make-tog-conv-item))
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
 (tog)

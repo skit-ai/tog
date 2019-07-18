@@ -29,8 +29,7 @@
 (require 'dash)
 
 ;; Forward declarations
-(defvar tog-index)
-(defvar tog-items)
+(defvar tog-loader)
 
 (defun line-text ()
   "Return text in the current line."
@@ -47,7 +46,7 @@
     (cons item list)))
 
 (defmacro with-current-tog-item (&rest body)
-  `(let ((current-item (nth tog-index tog-items)))
+  `(let ((current-item (oref tog-loader :current-item)))
      ,@body))
 
 (provide 'tog-utils)

@@ -33,120 +33,70 @@
 (require 'f)
 (require 's)
 (require 'tog-base)
-(require 'tog-conv)
+(require 'tog-io)
 (require 'tog-progress)
 (require 'tog-timer)
+(require 'tog-utils)
 
 (defcustom tog-buffer-name "*tog*"
   "Name of the tagging buffer. This is the shared buffer for all
 kind of tagging. Note that only one kind of tagging can happen at
 a given time.")
 
-(defcustom tog-goto-hook nil
-  "Hook for any goto event.")
+(defcustom tog-nav-hook nil
+  "Hook for any navigation event.")
 
 (defcustom tog-annotate-hook nil
   "Hook after a tag is applied.")
 
-(defvar tog-source-file nil
-  "Path to the json source file where we have the data. The
-assumption is that the file contains a list of dictionaries each
-with at least an `id' key. The rest is open for interpretation by
-the main loading code.")
+(defvar tog-loader nil
+  "Data loader for current task")
 
-(defvar tog-items nil
-  "List of item objects for tagging. Each object is identified
-using an `id' key.")
+(defmacro deftog-nav (name lambda-list docstring &rest body)
+  "Macro for creating interactive navigation command. This makes
+sure that the current item is re-rendered and navigation hooks
+are called."
+  (declare (indent defun))
+  `(defun ,name ,lambda-list
+     ,docstring
+     (interactive)
+     ,@body
+     (tog-show (oref tog-loader :current-item))
+     (run-hooks 'tog-nav-hook)))
 
-(defvar tog-index nil
-  "Index of current item being tagged in the list `tog-items'.")
-
-(defun tog-goto (idx)
+(deftog-nav tog-goto (idx)
   "Jump to idx item for tagging. Boundary handling is done in
 this function so the caller need not worry about anything other
 +/-."
-  (setq tog-index (min (- (length tog-items) 1) (max 0 idx)))
-  (tog-show (nth tog-index tog-items))
-  (cond ((= tog-index 0) (message "Reached first item"))
-        ((= tog-index (- (length tog-items) 1)) (message "Reached last item")))
-  (run-hooks 'tog-goto-hook))
+  (tog-io-goto tog-loader idx))
 
-(defun tog-next ()
+(deftog-nav tog-next ()
   "Go to next item for tagging."
-  (interactive)
-  (tog-goto (+ tog-index 1)))
+  (tog-io-next tog-loader))
 
-(defun tog-next-untagged ()
-  "Go to next item which is untagged, ignoring current one."
-  (interactive)
-  (let ((jump-index (+ tog-index 1)))
-    (while (and (oref (nth jump-index tog-items) :tag)
-                (< jump-index (length tog-items)))
-      (cl-incf jump-index))
-    (tog-goto jump-index)))
-
-(defun tog-prev-untagged ()
-  "Go to previous item which is untagged, ignoring current one."
-  (interactive)
-  (let ((jump-index (- tog-index 1)))
-    (while (and (oref (nth jump-index tog-items) :tag)
-                (>= jump-index 0))
-      (cl-decf jump-index))
-    (tog-goto jump-index)))
-
-(defun tog-last-tagged ()
-  "Go to the last tagged item"
-  (interactive)
-  (let ((tagged-index)
-        (i 0))
-    (while (< i (length tog-items))
-      (when (oref (nth i tog-items) :tag)
-        (setq tagged-index i))
-      (cl-incf i))
-    (if tagged-index
-        (tog-goto tagged-index)
-      (message "No items tagged"))))
-
-(defun tog-prev ()
+(deftog-nav tog-prev ()
   "Go to previous item for tagging."
-  (interactive)
-  (tog-goto (- tog-index 1)))
+  (tog-io-prev tog-loader))
 
-(defun tog-save ()
-  "Save tags in a file. We generate a sibling file with the same
-name as the source file and add a suffix to it. This can be
-changed but I don't feel that is ever really needed."
+(deftog-nav tog-next-untagged ()
+  "Go to next item which is untagged, ignoring current one."
+  (tog-io-next-untagged tog-loader))
+
+(deftog-nav tog-prev-untagged ()
+  "Go to previous item which is untagged, ignoring current one."
+  (tog-io-prev-untagged tog-loader))
+
+(deftog-nav tog-last-tagged ()
+  "Go to the last tagged item"
+  (tog-io-last-tagged tog-loader))
+
+(defun tog-save-tags ()
   (interactive)
-  (let* ((canon-source-file (s-chop-suffix ".gz" tog-source-file))
-         (file-path (concat canon-source-file ".tog"))
-         (tags))
-    (dolist (it tog-items)
-      (if (oref it :tag)
-          ;; JSON needs string keys
-          (push (cons (number-to-string (oref it :id)) (oref it :tag)) tags)))
-    (f-write (json-encode-alist tags) 'utf-8 file-path)
-    (message "Tags saved at %s" file-path)))
+  (tog-io-save-tags tog-loader))
 
 (defun tog-load-tags ()
-  "Load tags from the sibling file and apply to current items.
-Tags are stored as map from item-id to tag objects represented as
-list of alist."
   (interactive)
-  (if (null tog-source-file)
-      (error "tog-source-file not defined, load a data file first.")
-    (let* ((canon-source-file (s-chop-suffix ".gz" tog-source-file))
-           (file-path (concat canon-source-file ".tog"))
-           (json-array-type 'list))
-      (if (not (f-exists? file-path))
-          (message "Tag file not found. Loading nothing")
-        ;; TODO: This can be sped up if I choose right data structures. Not a
-        ;;       problem at the moment though.
-        (dolist (tag-data (json-read-file file-path))
-          (dolist (tog-item tog-items)
-            (if (= (oref tog-item :id)
-                   (string-to-number (symbol-name (car tag-data))))
-                (dolist (tag (cdr tag-data))
-                  (tog-add-tag tog-item tag)))))))))
+  (tog-io-load-tags tog-loader))
 
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
@@ -158,25 +108,24 @@ list of alist."
 (defun tog ()
   "Start tagging."
   (interactive)
-  (if (null tog-items)
-      (message "No data loaded, try running a loader.")
-    (setq tog-index -1)
+  (if (null tog-loader)
+      (message "tog-loader is null. Try creating a loader.")
     (tog-timer-start)
     (tog-next)))
 
 (defun tog-tag ()
   "Command to initiate tag collection for current tog-item."
   (interactive)
-  (let ((current-item (nth tog-index tog-items)))
-    (tog-annotate current-item)
-    (tog-show current-item)))
+  (with-current-tog-item
+   (tog-annotate current-item)
+   (tog-show current-item)))
 
 (defun tog-clear ()
   "Command to clear tag for current item."
   (interactive)
-  (let ((current-item (nth tog-index tog-items)))
-    (tog-clear-tag current-item)
-    (tog-show current-item)))
+  (with-current-tog-item
+   (tog-clear-tag current-item)
+   (tog-show current-item)))
 
 ;;;###autoload
 (defun tog-quit ()
@@ -186,8 +135,7 @@ screw ups while tagging."
   (interactive)
   (when (get-buffer tog-buffer-name)
     (kill-buffer tog-buffer-name))
-  (setq tog-items nil
-        tog-index nil)
+  (setq tog-loader nil)
   (tog-timer-reset))
 
 (provide 'tog)
