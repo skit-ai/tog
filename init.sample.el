@@ -34,7 +34,7 @@
 (setq tog-conv-types '("PEOPLE" "DATE" "TIME" "DATETIME"))
 (setq tog-conv-method 'ranged)
 ;; First we load the data file with items to tag
-(setq tog-loader (make-tog-io-json-loader "../ai/plute/analyses/bbq/data/tog/conv-dt-people.0000-00-00.1.json.gz" #'make-tog-conv-item))
+(setq tog-loader (make-tog-io-json-loader "./conv-region.json" #'make-tog-conv-item))
 ;; Next, optionally, load the already done tags
 (tog-load-tags)
 (add-hook 'tog-annotate-hook #'tog-timer-update)
