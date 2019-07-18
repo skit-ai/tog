@@ -1,8 +1,12 @@
 ;; Example init file for working with standalone `cask emacs'
 
+;; Load path for tog library
 (add-to-list 'load-path default-directory)
+;; Path for custom taggers
+(add-to-list 'load-path (concat default-directory "taggers"))
 
 (require 'tog)
+(require 'tog-conv)
 (require 'cl-lib)
 (require 'dash)
 
