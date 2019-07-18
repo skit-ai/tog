@@ -18,8 +18,8 @@ tools:
 
 1. ~mplayer~ for playing audios. This can be changed by changing
    ~tog-player-command~ variable.
-2. ~arecord~ and ~sox~ for recording audio. These are only need if your tagger uses
-   ~tog-input-audio~ functions.
+2. ~arecord~ and ~sox~ for recording audio. These are only needed if your tagger
+   uses ~tog-input-audio~ functions.
 
 ** Creating a tagger
 
