@@ -2,14 +2,183 @@
 
 [[https://travis-ci.com/Vernacular-ai/tog][https://img.shields.io/travis/com/Vernacular-ai/tog/master.svg?style=flat-square]]
 
-A hackable data-tagging framework for (mostly) natural language data.
+A hackable Emacs based data-tagging framework.
 
 [[file:./screen-tagged.png]]
 
-For tagging, you can either install this package or just run Emacs standalone
-and load only tog (and its dependencies). Following steps are needed to do the
-later:
+* Installation and Usage
 
-1. Install Emacs and [[https://github.com/cask/cask][cask]].
-2. In this directory run ~cask install~ to install dependencies locally.
-3. Check ~./init.sample.el~.
+You will need Emacs (not tested on version below 26). Recommended way for
+installing Emacs Lisp dependencies is to install [[https://github.com/cask/cask][cask]] and do ~cask install~ here.
+Once done, open ~cask emacs -Q ./init.sample.el~ to check out sample workflows
+with few of the existing taggers in ~./taggers~ directory.
+
+Additionally, for working with audio, we depend on the following command line
+tools:
+
+1. ~mplayer~ for playing audios. This can be changed by changing
+   ~tog-player-command~ variable.
+2. ~arecord~ and ~sox~ for recording audio. These are only need if your tagger uses
+   ~tog-input-audio~ functions.
+
+* Creating a tagger
+
+Working with and creating a tog tagger needs the user to define:
+
+1. Data loader for loading and saving data
+2. A ~tog-item~ class and few of it's methods
+
+** Data loader
+
+A loader takes care of keeping and navigating around the data items being tagged
+or to be tagged. It also defines mechanism for saving and loading tags.
+
+At the moment, we have a simple JSON based loader (check out ~tog-io-json-loader~)
+which assumes the data items are kept as list of dicts (with mandatory ~id~ keys)
+in a JSON file. It dumps tags in a sibling file (adding a ~.tog~ to the source
+file name) as a dictionary mapping item ~id~ to tag.
+
+There are plans for supporting better loaders and serialization formats. A
+closer to completion one is where we stream data bidirectionally for active
+learning. These will be implemented by extending the classes in ~tog-io~ package.
+
+** Tog item
+
+An item to tag is defined by creating a class that inherits from ~tog-item~ class.
+The default slots there are ~id,~ which uniquely identifies the item, and ~tag~
+which keeps certain representation of tag for the item, or ~nil~ if this item is
+untagged as of now.
+
+Let's assume we are tagging intent (multiple intents are allowed) for a given
+text. The list of possible intents is the following:
+
+- ~greeting~
+- ~goodbye~
+
+Our item can look like this:
+#+begin_src emacs-lisp
+  (defclass tog-text-item (tog-item)
+    ((text :initarg :text)))
+#+end_src
+
+#+RESULTS:
+: tog-text-item
+
+Also let's setup the list of intents somewhere
+
+#+begin_src emacs-lisp
+  (defcustom tog-text-intents '("greeting" "goodbye") "Example intents")
+#+end_src
+
+#+RESULTS:
+: tog-text-intents
+
+Next, the following functions/methods need to be defined:
+
+*** Factory function
+A factory function that creates an object of the above class based on an input
+data structure decided by the data loader.
+
+For a simple JSON loader, the factory function takes a hash-table and returns
+the newly created object. For this example, we assume that our data is kept like
+this in a json:
+
+#+begin_src shell :exports both :results output
+cat ./test/resources/text-intent-data.json
+#+end_src
+
+#+RESULTS:
+: [
+:   {"id": 1, "text": "hello world"},
+:   {"id": 2, "text": "goodbye"}
+: ]
+
+Since the JSON loader reads a list of dictionaries from file as Emacs Lisp
+hashtables, our factory function can be the following:
+
+#+begin_src emacs-lisp
+  (defun make-tog-text-item (table)
+    (tog-text-item :id (gethash "id" table)
+                   :text (gethash "text" table)))
+#+end_src
+
+#+RESULTS:
+: make-tog-text-item
+
+*** ~tog-add-tag~
+This adds a tag to an item. Here is an example for the current intent tagging
+case. Assuming that the tag is just a string and each item can get multiple such
+tags, we can do something like this:
+
+#+begin_src emacs-lisp
+  (cl-defmethod tog-add-tag ((obj tog-text-item) tag)
+    ;; You might want to handle duplicates here
+    (oset obj :tag (cons tag (oref obj :tag))))
+#+end_src
+
+#+RESULTS:
+: tog-add-tag
+
+*** ~tog-show~
+This defines how the item is going to be rendered in the ~tog-mode~ buffer. Since
+~tog-mode~ inherits from ~org-mode~, you can use various org mode functions. For our
+simple case, we will just show the item ~id~, ~text~ and current ~tag~ in separate
+lines.
+
+#+begin_src emacs-lisp
+  ;; Note that we are provided a clean buffer with tog mode on
+  (cl-defmethod tog-show ((obj tog-text-item))
+    (with-current-buffer (get-buffer-create tog-buffer-name)
+      ;; TODO: Probably should not need this read-only thingy
+      (let ((inhibit-read-only t))
+        (insert "id  : " (number-to-string (oref obj :id)) "\n")
+        (insert "text: " (oref obj :text) "\n")
+        ;; Also showing the currently applied tags
+        (insert "tags: " (string-join (oref obj :tag) ", ")))))
+#+end_src
+
+#+RESULTS:
+: tog-show
+
+*** ~tog-annotate~
+This method defines what happens when we start annotating the currently
+displayed item. In out case, we will just ask for an intent from the user and
+add to the current item:
+
+#+begin_src emacs-lisp
+  (cl-defmethod tog-annotate ((obj tog-text-item))
+    (let ((intent (tog-input-choice tog-text-intents)))
+      (tog-add-tag obj intent)))
+#+end_src
+
+#+RESULTS:
+: tog-annotate
+
+Now we can create a loader from our data file and start tagging:
+
+#+begin_src emacs-lisp
+  (setq tog-loader (make-tog-io-json-loader "./test/resources/text-intent-data.json" #'make-tog-text-item))
+  (tog)
+#+end_src
+
+#+RESULTS:
+
+After (wrong) tagging, the tags are saved here:
+
+#+begin_src shell :exports both :results output
+  cat ./test/resources/text-intent-data.json.tog
+#+end_src
+
+#+RESULTS:
+: {"2":["goodbye","greeting"],"1":["greeting"]}
+
+* Hooks
+
+1. ~tog-nav-hook~ is called whenever we navigate to any item. This can be useful
+   for setting up things like auto key presses for tagging speed up.
+2. ~tog-annotate-hook~ is called after every annotation act.
+
+* Keybindings
+
+Important general commands are listed and bound to sensible defaults in
+~./init.sample.el~. Check the file for more details.
