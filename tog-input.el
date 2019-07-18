@@ -34,7 +34,7 @@
 
 (defcustom tog-input-arecord-args (list "-f" "S16_LE" "-r" "48000" "-c" "2" "-d" "600")
   "Arguments to send to arecord while recording. We put a max
-duration limit so that an accident don't throw us out of memory.")
+duration limit so that an accident doesn't throw us out of memory.")
 
 (defvar tog-input-arecord-proc nil
   "Variable holding the process used for recording.")
