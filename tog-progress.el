@@ -28,22 +28,27 @@
 
 (require 'dash)
 (require 's)
+(require 'tog-io)
 (require 'tog-timer)
 
-(defun tog-progress-done ()
+(cl-defmethod tog-progress-done ((loader tog-io-jumpable-loader))
   "Return count of done items. This works over all the items and
 not only for the current session."
-  (-reduce-from (lambda (acc it) (if (oref it :tag) (+ acc 1) acc)) 0 tog-items))
+  (-reduce-from (lambda (acc it) (if (oref it :tag) (+ acc 1) acc)) 0 (oref loader :items)))
 
 (defun tog-progress-build-bar (n)
   "Return bar string of given size."
   (propertize (s-repeat n "—") 'face 'font-lock-keyword-face))
 
-(defun tog-progress-build-header ()
+(cl-defmethod tog-progress-build-header ((loader tog-io-loader))
+  "Return nothing when loader is not jumpable.")
+
+(cl-defmethod tog-progress-build-header ((loader tog-io-jumpable-loader))
   "Prepare string to show in header line"
   (let* ((width (window-width))
-         (current-pos (round (* width (/ (float tog-index) (length tog-items)))))
-         (n-done (round (* width (/ (float (tog-progress-done)) (length tog-items)))))
+         (total-items (length (oref loader :items)))
+         (current-pos (round (* width (/ (float (oref loader :current-index)) total-items))))
+         (n-done (round (* width (/ (float (tog-progress-done loader)) total-items))))
          (current-pos-marker "⯆"))
     (if (> current-pos n-done)
         (concat (tog-progress-build-bar n-done)
@@ -53,14 +58,19 @@ not only for the current session."
               current-pos-marker
               (tog-progress-build-bar (- n-done current-pos 1))))))
 
-(defun tog-progress-session-report ()
+(cl-defmethod tog-progress-report ((loader tog-io-loader))
+  (let ((speed (tog-timer-speed)))
+    (message "Speed: %s per item" (if speed (seconds-to-string speed) "NA"))))
+
+(cl-defmethod tog-progress-report ((loader tog-io-jumpable-loader))
   "Display (in message for now) update on the progress of current
 session."
-  (interactive)
-  (let ((n-left (- (length tog-items) (tog-progress-done)))
-        (speed (tog-timer-speed)))
-    (message "Total items: %s\nTime left to do %s items: %s [%s per item]"
-             (length tog-items) n-left
+  (let* ((total-items (length (oref loader :items)))
+         (n-done (tog-progress-done loader))
+         (n-left (- total-items n-done))
+         (speed (tog-timer-speed)))
+    (message "Total items: %s\nDone: %s\nTime left to do %s items: %s [%s per item]"
+             total-items n-done n-left
              (if speed (seconds-to-string (* n-left speed)) "NA")
              (if speed (seconds-to-string speed) "NA"))))
 

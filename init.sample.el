@@ -19,7 +19,7 @@
 (define-key tog-mode-map (kbd "DEL") 'tog-clear)
 (define-key tog-mode-map (kbd "C-x C-s") 'tog-save-tags)
 (define-key tog-mode-map (kbd "q") 'tog-quit)
-(define-key tog-mode-map (kbd "t") 'tog-progress-session-report)
+(define-key tog-mode-map (kbd "t") (lambda () (interactive) (tog-progress-report tog-loader)))
 
 ;; Conversation tagging specific keys
 (define-key tog-mode-map (kbd "SPC") 'tog-conv-play)

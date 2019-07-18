@@ -101,7 +101,7 @@ this function so the caller need not worry about anything other
 ;;;###autoload
 (define-derived-mode tog-mode org-mode "tog"
   "Major mode for togging."
-  :after-hook (setq header-line-format '(:eval (tog-progress-build-header)))
+  :after-hook (setq header-line-format '(:eval (tog-progress-build-header tog-loader)))
   (read-only-mode))
 
 ;;;###autoload
