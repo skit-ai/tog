@@ -41,7 +41,8 @@ not only for the current session."
   (propertize (s-repeat n "—") 'face 'font-lock-keyword-face))
 
 (cl-defmethod tog-progress-build-header ((loader tog-io-loader))
-  "Return nothing when loader is not jumpable.")
+  "Return nothing when loader is not jumpable."
+  "")
 
 (cl-defmethod tog-progress-build-header ((loader tog-io-jumpable-loader))
   "Prepare string to show in header line"
