@@ -90,7 +90,7 @@
           (tog-io-goto loader tagged-index)
         (message "No items tagged")))))
 
-(defclass tog-io-json-loader (tog-io-loader tog-io-jumpable-loader)
+(defclass tog-io-json-loader (tog-io-jumpable-loader tog-io-loader)
   ((source-file :initarg :source-file :documentation "Source file name of json.")
    (tag-file :initarg :tag-file :initform nil :documentation "File name for keeping tags in."))
   :documentation "Simple json loader with sibling tag file.")
