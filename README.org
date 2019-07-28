@@ -45,7 +45,7 @@ learning. These will be implemented by extending the classes in ~tog-io~ package
 *** Tog item
 
 An item to tag is defined by creating a class that inherits from ~tog-item~ class.
-The default slots there are ~id,~ which uniquely identifies the item, and ~tag~
+The default slots there are ~id~, which uniquely identifies the item, and ~tag~
 which keeps certain representation of tag for the item, or ~nil~ if this item is
 untagged as of now.
 
