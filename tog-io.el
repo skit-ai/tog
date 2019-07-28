@@ -39,7 +39,7 @@
   :abstract t
   :documentation "General loader interface")
 
-(defclass tog-io-jumpable-loader ()
+(defclass tog-io-jumpable-loader (tog-io-loader)
   ((current-index :initarg :current-index :initform nil :documentation "Index of the current item in the list ITEMS.")
    (items :initarg :items :initform nil :documentation "All the items."))
   :abstract t
@@ -90,7 +90,7 @@
           (tog-io-goto loader tagged-index)
         (message "No items tagged")))))
 
-(defclass tog-io-json-loader (tog-io-jumpable-loader tog-io-loader)
+(defclass tog-io-json-loader (tog-io-jumpable-loader)
   ((source-file :initarg :source-file :documentation "Source file name of json.")
    (tag-file :initarg :tag-file :initform nil :documentation "File name for keeping tags in."))
   :documentation "Simple json loader with sibling tag file.")
